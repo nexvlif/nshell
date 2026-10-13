@@ -85,6 +85,8 @@ Singleton {
     readonly property color acrylicFallback: bg1
     readonly property color edgeHighlight: stroke3
     readonly property color shadow: shadowKey
+
+    readonly property color overlay: Qt.rgba(0, 0, 0, 0.4)
     readonly property color textPrimary: fg1
     readonly property color textSecondary: fg2
 

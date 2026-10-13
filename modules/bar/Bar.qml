@@ -191,17 +191,48 @@ Scope {
                         NAvatar {
                             diameter: Config.options.bar.avatarSize
                             source: "file://" + Quickshell.env("HOME") + "/Pictures/pp.jpg" // It will be dynamic later
-                            onClicked: Ui.toggleLauncher()
+                            onClicked: Ui.toggleSession()
                         }
 
+                        // search pill inset — beranimasi saat palette terbuka
                         Rectangle {
+                            id: searchPill
                             visible: Config.options.bar.showSearch
                             implicitWidth: Config.options.bar.searchWidth
                             implicitHeight: 36
                             radius: Tokens.rounding.pill
                             color: Theme.bg3
-                            border.width: 1
-                            border.color: Theme.stroke2
+                            border.width: Ui.launcherOpen ? 2 : 1
+                            border.color: Ui.launcherOpen ? Theme.brandBg : Theme.stroke2
+                            transformOrigin: Item.Center
+                            Behavior on border.color {
+                                ColorAnimation {
+                                    duration: Tokens.anim.fast
+                                }
+                            }
+                            SequentialAnimation {
+                                id: searchPulse
+                                ScaleAnimator {
+                                    target: searchPill
+                                    from: 1
+                                    to: 0.94
+                                    duration: 90
+                                }
+                                ScaleAnimator {
+                                    target: searchPill
+                                    from: 0.94
+                                    to: 1
+                                    duration: 140
+                                    easing.type: Easing.OutBack
+                                }
+                            }
+                            Connections {
+                                target: Ui
+                                function onLauncherOpenChanged() {
+                                    if (Ui.launcherOpen)
+                                        searchPulse.restart();
+                                }
+                            }
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 12
@@ -210,7 +241,12 @@ Scope {
                                 NIcon {
                                     name: "search"
                                     iconSize: 16
-                                    color: Theme.fg3
+                                    color: Ui.launcherOpen ? Theme.brandFg1 : Theme.fg3
+                                    Behavior on color {
+                                        ColorAnimation {
+                                            duration: Tokens.anim.fast
+                                        }
+                                    }
                                 }
                                 NText {
                                     Layout.fillWidth: true
@@ -315,11 +351,12 @@ Scope {
                         Layout.alignment: Qt.AlignHCenter
                         diameter: Config.options.bar.avatarSize
                         source: "file://" + Quickshell.env("HOME") + "/Pictures/pp.jpg"
-                        onClicked: Ui.toggleLauncher()
+                        onClicked: Ui.toggleSession()
                     }
                     NIconButton {
                         Layout.alignment: Qt.AlignHCenter
                         name: "search"
+                        restColor: Ui.launcherOpen ? Theme.brandFg1 : Theme.fg2
                         onClicked: Ui.toggleLauncher()
                     }
 

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Wayland
 import Quickshell.Widgets
 import qs.ndesign
 import qs.services
@@ -18,170 +19,300 @@ Scope {
 
             visible: Ui.launcherOpen
             exclusionMode: ExclusionMode.Ignore
-
-            property string pos: Config.options.bar.position
-            readonly property var barMargins: Config.options.bar.margins[pos] ?? Config.options.bar.margins["bottom"]
-            anchors {
-                top: pos === "top"
-                bottom: pos === "bottom"
-                left: pos === "left"
-                right: pos === "right"
-            }
-            margins {
-                top: pos === "top" ? Config.options.bar.height + barMargins.top + 12 : 0
-                bottom: pos === "bottom" ? Config.options.bar.height + barMargins.bottom + 12 : 0
-                left: pos === "left" ? Config.options.bar.height + barMargins.left + 12 : 0
-                right: pos === "right" ? Config.options.bar.height + barMargins.right + 12 : 0
-            }
-            implicitWidth: 580
-            implicitHeight: 470
             color: "transparent"
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
+            anchors {
+                top: true
+                bottom: true
+                left: true
+                right: true
+            }
+
+            onVisibleChanged: {
+                if (visible) {
+                    query = "";
+                    box.field.text = "";
+                    rebuild();
+                    box.field.forceActiveFocus();
+                }
+            }
 
             property string query: ""
+            property var results: []
+
+            function rebuild(): void {
+                const q = win.query.toLowerCase().trim();
+                const out = [];
+                const apps = DesktopEntries.applications.values.filter(a => !a.noDisplay);
+                const matched = q ? apps.filter(a => (a.name + " " + (a.genericName || "") + " " + a.id).toLowerCase().includes(q)) : apps;
+                const top = matched.slice(0, 7);
+                if (top.length > 0) {
+                    out.push({
+                        kind: "header",
+                        name: "Applications"
+                    });
+                    for (const a of top)
+                        out.push({
+                            kind: "app",
+                            name: a.name,
+                            sub: a.genericName || a.id,
+                            entry: a
+                        });
+                }
+                const cmds = [{
+                    name: "Lock",
+                    sub: "Lock session",
+                    icon: "lock_closed",
+                    run: Session.lock
+                }, {
+                    name: "Sleep",
+                    sub: "Suspend system",
+                    icon: "sleep",
+                    run: Session.suspend
+                }, {
+                    name: "Log out",
+                    sub: "End session",
+                    icon: "door_arrow_right",
+                    run: Session.logout
+                }, {
+                    name: "Restart",
+                    sub: "Reboot system",
+                    icon: "arrow_sync",
+                    run: Session.reboot
+                }, {
+                    name: "Shut down",
+                    sub: "Power off",
+                    icon: "power",
+                    run: Session.poweroff
+                }].filter(c => !q || (c.name + " " + c.sub).toLowerCase().includes(q));
+                if (cmds.length > 0) {
+                    out.push({
+                        kind: "header",
+                        name: "System"
+                    });
+                    for (const c of cmds)
+                        out.push({
+                            kind: "cmd",
+                            name: c.name,
+                            sub: c.sub,
+                            icon: c.icon,
+                            run: c.run
+                        });
+                }
+                win.results = out;
+                list.currentIndex = firstActivatable(0, 1);
+            }
+
+            function firstActivatable(from: int, dir: int): int {
+                let i = from;
+                while (i >= 0 && i < win.results.length) {
+                    if (win.results[i].kind !== "header")
+                        return i;
+                    i += dir;
+                }
+                return -1;
+            }
+
+            function moveSelection(dir: int): void {
+                if (win.results.length === 0)
+                    return;
+                let i = list.currentIndex < 0 ? (dir > 0 ? -1 : win.results.length) : list.currentIndex;
+                for (let step = 0; step < win.results.length; ++step) {
+                    i += dir;
+                    if (i < 0)
+                        i = win.results.length - 1;
+                    if (i >= win.results.length)
+                        i = 0;
+                    if (win.results[i].kind !== "header") {
+                        list.currentIndex = i;
+                        return;
+                    }
+                }
+            }
+
+            function activateAt(index: int): void {
+                if (index < 0 || index >= win.results.length)
+                    return;
+                const item = win.results[index];
+                if (item.kind === "app") {
+                    Ui.closeAll();
+                    if (item.entry.runInTerminal)
+                        Quickshell.execDetached(["xdg-terminal-exec", ...item.entry.command]);
+                    else
+                        item.entry.execute();
+                } else if (item.kind === "cmd") {
+                    Ui.closeAll();
+                    item.run();
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: Theme.overlay
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Ui.closeAll()
+                }
+            }
 
             NRect {
-                anchors.fill: parent
+                width: 640
+                height: 480
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: Math.round(parent.height * 0.18)
                 corner: Tokens.rounding.xlarge
                 fill: "bg1"
                 stroke: "subtle"
                 shadow: 28
-
-                onVisibleChanged: {
-                    if (visible) {
-                        win.query = "";
-                        box.field.text = "";
-                        box.field.forceActiveFocus();
+                scale: win.visible ? 1 : 0.96
+                opacity: win.visible ? 1 : 0
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: Tokens.anim.fast
+                        easing.type: Easing.OutCubic
+                    }
+                }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Tokens.anim.fast
                     }
                 }
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: Tokens.spacing.xl
-                    spacing: Tokens.spacing.m
+                    anchors.margins: Tokens.spacing.m
+                    spacing: Tokens.spacing.s
 
                     NSearchBox {
                         id: box
                         Layout.fillWidth: true
-                        placeholder: "Type here to search"
-                        onAccepted: {
-                            if (grid.count > 0) {
-                                const first = grid.filtered[0];
-                                if (first)
-                                    launchApp(first);
-                            }
+                        Layout.preferredHeight: 40
+                        placeholder: "Type a command or search"
+                        field.onTextChanged: {
+                            win.query = field.text;
+                            win.rebuild();
                         }
-                        field.onTextChanged: win.query = field.text
+                        field.Keys.onDownPressed: win.moveSelection(1)
+                        field.Keys.onUpPressed: win.moveSelection(-1)
+                        field.Keys.onReturnPressed: win.activateAt(list.currentIndex)
+                        field.Keys.onEnterPressed: win.activateAt(list.currentIndex)
                         field.Keys.onEscapePressed: Ui.closeAll()
                     }
 
-                    NText {
-                        kind: "body"
-                        semibold: true
-                        text: "Pinned"
-                    }
-
-                    GridView {
-                        id: grid
+                    ListView {
+                        id: list
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
-                        cellWidth: 104
-                        cellHeight: 92
-
-                        property var filtered: {
-                            const q = win.query.toLowerCase();
-                            const apps = DesktopEntries.applications.values.filter(a => !a.noDisplay);
-                            if (!q)
-                                return apps.slice(0, 30);
-                            return apps.filter(a => (a.name + " " + (a.genericName || "") + " " + a.id).toLowerCase().includes(q)).slice(0, 30);
-                        }
-                        model: filtered
+                        model: win.results
+                        spacing: 2
+                        highlightMoveDuration: Tokens.anim.faster
 
                         delegate: Item {
-                            required property DesktopEntry modelData
-                            width: 104
-                            height: 92
+                            required property var modelData
+                            required property int index
+                            width: list.width
+                            implicitHeight: modelData.kind === "header" ? 28 : 52
 
                             Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 3
                                 radius: Tokens.rounding.medium
-                                color: appHover.pressed ? Theme.subtlePressed : appHover.containsMouse ? Theme.subtleHover : "transparent"
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: Tokens.anim.fast
-                                    }
+                                color: {
+                                    if (modelData.kind === "header")
+                                        return "transparent";
+                                    if (list.currentIndex === index)
+                                        return Theme.subtleSelected;
+                                    return hoverArea.containsMouse ? Theme.subtleHover : "transparent";
                                 }
-                                ColumnLayout {
+                                NText {
+                                    visible: modelData.kind === "header"
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    kind: "caption"
+                                    color: Theme.fg3
+                                    text: modelData.name
+                                }
+                                RowLayout {
+                                    visible: modelData.kind !== "header"
                                     anchors.fill: parent
-                                    anchors.margins: 6
-                                    spacing: 4
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 12
+                                    spacing: 12
                                     IconImage {
-                                        Layout.alignment: Qt.AlignHCenter
+                                        Layout.alignment: Qt.AlignVCenter
+                                        visible: modelData.kind === "app"
                                         asynchronous: true
-                                        source: Quickshell.iconPath(modelData?.icon, "image-missing")
-                                        implicitSize: 32
+                                        source: modelData.kind === "app" ? Quickshell.iconPath(modelData.entry?.icon, "image-missing") : ""
+                                        implicitSize: 28
                                     }
-                                    NText {
+                                    NIcon {
+                                        Layout.alignment: Qt.AlignVCenter
+                                        visible: modelData.kind === "cmd"
+                                        name: modelData.icon || "settings"
+                                        filled: list.currentIndex === index
+                                        iconSize: 22
+                                        color: list.currentIndex === index ? Theme.brandFg1 : Theme.fg2
+                                    }
+                                    ColumnLayout {
                                         Layout.fillWidth: true
-                                        horizontalAlignment: Text.AlignHCenter
-                                        elide: Text.ElideRight
-                                        maximumLineCount: 2
-                                        wrapMode: Text.WordWrap
-                                        kind: "caption"
-                                        color: Theme.fg1
-                                        text: modelData?.name ?? ""
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 0
+                                        NText {
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                            kind: "body"
+                                            text: modelData.name
+                                        }
+                                        NText {
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                            kind: "caption"
+                                            color: Theme.fg3
+                                            text: modelData.sub || ""
+                                        }
                                     }
                                 }
                             }
                             MouseArea {
-                                id: appHover
+                                id: hoverArea
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: launchApp(modelData)
+                                cursorShape: modelData.kind === "header" ? Qt.ArrowCursor : Qt.PointingHandCursor
+                                onEntered: {
+                                    if (modelData.kind !== "header")
+                                        list.currentIndex = index;
+                                }
+                                onClicked: win.activateAt(index)
                             }
                         }
                     }
 
-                    RowLayout {
+                    NText {
+                        visible: win.results.length === 0
                         Layout.fillWidth: true
-                        spacing: Tokens.spacing.s
-                        Rectangle {
-                            implicitWidth: 32
-                            implicitHeight: 32
-                            radius: 16
-                            color: Theme.brandBg
-                            NText {
-                                anchors.centerIn: parent
-                                text: (Quickshell.env("USER") || "n").substring(0, 1).toUpperCase()
-                                color: "#ffffff"
-                                kind: "title"
-                            }
-                        }
-                        NText {
-                            Layout.fillWidth: true
-                            kind: "body"
-                            color: Theme.fg1
-                            text: Quickshell.env("USER") || "user"
-                        }
-                        NButton {
-                            variant: "subtle"
-                            icon: "power"
-                            text: "Power"
-                            onClicked: Quickshell.execDetached(["systemctl", "poweroff"])
-                        }
+                        horizontalAlignment: Text.AlignHCenter
+                        kind: "body"
+                        color: Theme.fg3
+                        text: "No results"
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+                        color: Theme.stroke2
+                    }
+                    NText {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        kind: "caption"
+                        color: Theme.fg3
+                        text: "↑↓ navigate · ↵ open · esc close"
                     }
                 }
             }
         }
-    }
-
-    function launchApp(entry: DesktopEntry): void {
-        Ui.closeAll();
-        if (entry.runInTerminal)
-            Quickshell.execDetached(["xdg-terminal-exec", ...entry.command]);
-        else
-            entry.execute();
     }
 }

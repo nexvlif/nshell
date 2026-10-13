@@ -3,6 +3,8 @@ import QtQuick
 import Quickshell
 import qs.modules.bar
 import qs.modules.launcher
+import qs.modules.session
+import qs.modules.shortcuts
 import qs.modules.notifications
 import qs.modules.osd
 import qs.services
@@ -10,10 +12,8 @@ import qs.services
 ShellRoot {
     id: root
 
-    // Paksa Config load duluan biar ready sebelum modul baca options.
     property var _cfg: Config
 
-    // Font ikon resmi Microsoft (FluentSystemIcons, MIT) — dipakai NIcon.
     FontLoader {
         source: Qt.resolvedUrl("assets/fonts/FluentSystemIcons-Regular.ttf")
     }
@@ -23,6 +23,8 @@ ShellRoot {
 
     Bar {}
     Launcher {}
+    SessionMenu {}
+    Shortcuts {}
     Notifications {}
     Osd {}
 }
