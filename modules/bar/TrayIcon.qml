@@ -9,11 +9,14 @@ Item {
     id: root
     required property var item
     property string barPos: "bottom"
+    property var trayScreen: null
     property bool menuOpen: false
 
     implicitWidth: 20
     implicitHeight: 20
 
+    readonly property bool isVertical: barPos === "left" || barPos === "right"
+    readonly property var barMargins: Config.options.bar.margins[barPos] ?? Config.options.bar.margins["bottom"]
     readonly property var anchorEdges: {
         if (barPos === "top")
             return Edges.Bottom;
@@ -33,17 +36,38 @@ Item {
         return Edges.Bottom;
     }
 
-    function openMenu(): void {
-        if (Ui.trayMenuOwner && Ui.trayMenuOwner !== root)
-            Ui.trayMenuOwner.closeMenu();
-        Ui.trayMenuOwner = root;
-        root.menuOpen = true;
-        menuPanel.forceActiveFocus();
+    function screenPos(): var {
+        const w = root.Window.window;
+        const p = root.mapToItem(w.contentItem, 0, 0);
+        const m = root.barMargins;
+        const bx = m.left ?? 0;
+        let by = 0;
+        if (barPos === "top")
+            by = m.top ?? 0;
+        else if (trayScreen)
+            by = trayScreen.height - (m.bottom ?? 0) - w.height;
+        return {
+            x: bx + p.x,
+            y: by + p.y
+        };
+    }
+    function toggleMenu(): void {
+        if (root.isVertical) {
+            root.menuOpen = !root.menuOpen;
+            if (root.menuOpen)
+                menuPanel.forceActiveFocus();
+            return;
+        }
+        if (Ui.trayMenuItem === root.item) {
+            Ui.closeTrayMenu();
+            return;
+        }
+        const s = root.screenPos();
+        Ui.openTrayMenu(root.item, trayScreen, s.x, s.y);
     }
     function closeMenu(): void {
         root.menuOpen = false;
-        if (Ui.trayMenuOwner === root)
-            Ui.trayMenuOwner = null;
+        Ui.closeTrayMenu();
     }
 
     Image {
@@ -59,23 +83,15 @@ Item {
         cursorShape: Qt.PointingHandCursor
         onClicked: mouse => {
             if (mouse.button === Qt.RightButton) {
-                if (root.item.hasMenu) {
-                    if (root.menuOpen)
-                        root.closeMenu();
-                    else
-                        root.openMenu();
-                } else {
+                if (root.item.hasMenu)
+                    root.toggleMenu();
+                else
                     root.item.secondaryActivate();
-                }
             } else if (root.item.onlyMenu) {
-                if (root.item.hasMenu) {
-                    if (root.menuOpen)
-                        root.closeMenu();
-                    else
-                        root.openMenu();
-                } else {
+                if (root.item.hasMenu)
+                    root.toggleMenu();
+                else
                     root.item.activate();
-                }
             } else {
                 root.closeMenu();
                 root.item.activate();
@@ -87,16 +103,6 @@ Item {
         }
     }
 
-    Connections {
-        target: Ui
-        function onTrayMenuOwnerChanged() {
-            if (Ui.trayMenuOwner !== root)
-                root.menuOpen = false;
-        }
-        function onUiRevChanged() {
-            root.closeMenu();
-        }
-    }
     Connections {
         target: ToplevelManager
         function onActiveToplevelChanged() {
@@ -116,7 +122,7 @@ Item {
         anchor.gravity: root.anchorGravity
         width: 248
         height: Math.min(menuFlick.contentHeight + 12, 480)
-        visible: root.menuOpen
+        visible: root.isVertical && root.menuOpen
         color: "transparent"
 
         NRect {

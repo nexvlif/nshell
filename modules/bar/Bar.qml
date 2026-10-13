@@ -293,6 +293,7 @@ Scope {
                                     anchors.fill: parent
                                     item: modelData
                                     barPos: pos
+                                    trayScreen: win.screen
                                 }
                             }
                         }
@@ -652,6 +653,7 @@ Scope {
                                     anchors.fill: parent
                                     item: modelData
                                     barPos: pos
+                                    trayScreen: win.screen
                                 }
                             }
                         }
@@ -728,6 +730,84 @@ Scope {
                             color: Theme.fg3
                             text: Time.format("AP")
                             visible: Config.options.bar.clock12h
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        PanelWindow {
+            required property var modelData
+            screen: modelData
+
+            visible: Ui.trayMenuItem !== null && Ui.trayMenuScreen === screen
+            exclusionMode: ExclusionMode.Ignore
+            color: "transparent"
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+            anchors {
+                top: true
+                bottom: true
+                left: true
+                right: true
+            }
+
+            onVisibleChanged: {
+                if (visible)
+                    menuPanel.forceActiveFocus();
+            }
+
+            readonly property int menuW: 248
+            readonly property real menuX: {
+                if (!Ui.trayMenuScreen)
+                    return 8;
+                return Math.min(Math.max(Ui.trayMenuX + 20 - menuW, 8), Ui.trayMenuScreen.width - menuW - 8);
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: "transparent"
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Ui.closeTrayMenu()
+                }
+            }
+
+            QsMenuOpener {
+                id: menuOpener
+                menu: Ui.trayMenuItem ? Ui.trayMenuItem.menu : null
+            }
+
+            NRect {
+                id: menuPanel
+                focus: true
+                Keys.onEscapePressed: Ui.closeTrayMenu()
+                width: menuW
+                x: menuX
+                y: pos === "top" ? Ui.trayMenuY + 24 : Math.max(8, Ui.trayMenuY - 4 - height)
+                height: Math.min(menuFlick.contentHeight + 12, 480)
+                corner: Tokens.rounding.large
+                fill: "bg1"
+                stroke: "subtle"
+                shadow: 16
+
+                Flickable {
+                    id: menuFlick
+                    anchors.fill: parent
+                    anchors.margins: 6
+                    clip: true
+                    contentWidth: width
+                    contentHeight: menuItems.implicitHeight
+                    ColumnLayout {
+                        id: menuItems
+                        width: menuFlick.width
+                        TrayMenuItems {
+                            Layout.fillWidth: true
+                            opener: menuOpener
+                            onCloseRequested: Ui.closeTrayMenu()
                         }
                     }
                 }

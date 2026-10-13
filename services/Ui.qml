@@ -14,11 +14,24 @@ Singleton {
     property bool calendarOpen: false
     property bool osdOpen: false
     property string osdKind: "volume"
-    property var trayMenuOwner: null
-    property int uiRev: 0
+    property var trayMenuItem: null
+    property var trayMenuScreen: null
+    property real trayMenuX: 0
+    property real trayMenuY: 0
+
+    function openTrayMenu(item, screen, x, y): void {
+        trayMenuItem = item;
+        trayMenuScreen = screen;
+        trayMenuX = x;
+        trayMenuY = y;
+    }
+    function closeTrayMenu(): void {
+        trayMenuItem = null;
+        trayMenuScreen = null;
+    }
 
     function toggleLauncher(): void {
-        uiRev++;
+        closeTrayMenu();
         sessionOpen = false;
         nflyoutOpen = false;
         controlOpen = false;
@@ -27,7 +40,7 @@ Singleton {
         launcherOpen = !launcherOpen;
     }
     function toggleSession(): void {
-        uiRev++;
+        closeTrayMenu();
         launcherOpen = false;
         nflyoutOpen = false;
         controlOpen = false;
@@ -36,7 +49,7 @@ Singleton {
         sessionOpen = !sessionOpen;
     }
     function toggleNflyout(): void {
-        uiRev++;
+        closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
         controlOpen = false;
@@ -45,7 +58,7 @@ Singleton {
         nflyoutOpen = !nflyoutOpen;
     }
     function toggleControl(): void {
-        uiRev++;
+        closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
         nflyoutOpen = false;
@@ -54,7 +67,7 @@ Singleton {
         controlOpen = !controlOpen;
     }
     function toggleNotif(): void {
-        uiRev++;
+        closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
         nflyoutOpen = false;
@@ -67,7 +80,7 @@ Singleton {
         }
     }
     function toggleCalendar(): void {
-        uiRev++;
+        closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
         nflyoutOpen = false;
@@ -76,7 +89,7 @@ Singleton {
         calendarOpen = !calendarOpen;
     }
     function closeAll(): void {
-        uiRev++;
+        closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
         nflyoutOpen = false;
