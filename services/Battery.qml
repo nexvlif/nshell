@@ -17,8 +17,6 @@ Singleton {
             return "battery_10";
         if (critical)
             return "battery_warning";
-        if (charging)
-            return "battery_charge_" + level;
         return "battery_" + level;
     }
     readonly property string stateColor: {

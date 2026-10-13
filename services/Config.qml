@@ -93,9 +93,12 @@ Singleton {
                 property int avatarSize: 36
                 property int searchWidth: 220
                 property int shadow: 0
+                property list<string> pinnedApps: []
                 property bool clock12h: true
                 property bool showDate: true
                 property bool showSearch: true
+                property bool showWeather: true
+                property bool showResources: false
                 property bool showActiveWindow: true
                 property bool showWorkspaces: true
                 property bool showTray: true
@@ -108,6 +111,7 @@ Singleton {
             }
             property JsonObject notifications: JsonObject {
                 property int timeout: 5000
+                property bool dnd: false
             }
             property JsonObject osd: JsonObject {
                 property int timeout: 1200

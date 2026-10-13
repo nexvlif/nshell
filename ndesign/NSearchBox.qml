@@ -5,6 +5,7 @@ import qs.ndesign
 Rectangle {
     id: root
     property string placeholder: "Search"
+    property string icon: "search"
     property alias text: input.text
     property alias field: input
     signal accepted
@@ -26,7 +27,7 @@ Rectangle {
         anchors.rightMargin: 10
         spacing: 8
         NIcon {
-            name: "search"
+            name: root.icon
             iconSize: 16
             color: Theme.fg3
         }

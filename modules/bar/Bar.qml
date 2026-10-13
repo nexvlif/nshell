@@ -4,6 +4,8 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import Quickshell.Services.SystemTray
+import qs.modules.activewindow
+import qs.modules.pinned
 import qs.ndesign
 import qs.services
 
@@ -75,43 +77,195 @@ Scope {
                 visible: !vertical
                 anchors.fill: parent
 
-                NRect {
+                Item {
                     anchors.left: parent.left
-                    anchors.leftMargin: 0
                     anchors.verticalCenter: parent.verticalCenter
                     implicitHeight: pillSize
-                    implicitWidth: clockCol.implicitWidth + Config.options.bar.pillPadding
-                    corner: Tokens.rounding.xxlarge
-                    fill: "bg1"
-                    stroke: "subtle"
-                    shadow: Config.options.bar.shadow
-
-                    ColumnLayout {
-                        id: clockCol
-                        anchors.centerIn: parent
-                        spacing: 0
-                        NText {
-                            Layout.alignment: Qt.AlignHCenter
-                            kind: "body"
-                            semibold: true
-                            text: Config.options.bar.clock12h ? Time.timeShort : Time.format("HH:mm")
+                    implicitWidth: leftRow.implicitWidth
+                    RowLayout {
+                        id: leftRow
+                        anchors.fill: parent
+                        spacing: 8
+                        NRect {
+                            Layout.preferredHeight: pillSize
+                            implicitWidth: clockCol.implicitWidth + Config.options.bar.pillPadding
+                            corner: Tokens.rounding.xxlarge
+                            fill: "bg1"
+                            stroke: "subtle"
+                            shadow: Config.options.bar.shadow
+                            border.width: Ui.calendarOpen ? 2 : 1
+                            border.color: Ui.calendarOpen ? Theme.brandBg : Theme.stroke2
+                            ColumnLayout {
+                                id: clockCol
+                                anchors.centerIn: parent
+                                spacing: 0
+                                NText {
+                                    Layout.alignment: Qt.AlignHCenter
+                                    kind: "body"
+                                    semibold: true
+                                    text: Config.options.bar.clock12h ? Time.timeShort : Time.format("HH:mm")
+                                }
+                                NText {
+                                    Layout.alignment: Qt.AlignHCenter
+                                    kind: "caption"
+                                    color: Theme.fg3
+                                    text: Time.dateShort
+                                    visible: Config.options.bar.showDate
+                                }
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleCalendar()
+                            }
                         }
-                        NText {
-                            Layout.alignment: Qt.AlignHCenter
-                            kind: "caption"
-                            color: Theme.fg3
-                            text: Time.dateShort
-                            visible: Config.options.bar.showDate
+                        NRect {
+                            visible: Config.options.bar.showActiveWindow && ToplevelManager.activeToplevel !== null
+                            Layout.preferredHeight: pillSize
+                            implicitWidth: winText.implicitWidth + Config.options.bar.pillPadding
+                            corner: Tokens.rounding.xxlarge
+                            fill: "bg1"
+                            stroke: "subtle"
+                            shadow: Config.options.bar.shadow
+                            ActiveWindow {
+                                id: winText
+                                anchors.centerIn: parent
+                            }
+                        }
+                        NRect {
+                            visible: Config.options.bar.showWeather
+                            Layout.preferredHeight: pillSize
+                            implicitWidth: wxRow.implicitWidth + Config.options.bar.pillPadding
+                            corner: Tokens.rounding.xxlarge
+                            fill: "bg1"
+                            stroke: "subtle"
+                            shadow: Config.options.bar.shadow
+                            RowLayout {
+                                id: wxRow
+                                anchors.centerIn: parent
+                                spacing: 6
+                                NIcon {
+                                    name: Weather.icon
+                                    iconSize: 18
+                                    color: Theme.fg1
+                                }
+                                NText {
+                                    kind: "small"
+                                    semibold: true
+                                    text: Weather.text
+                                }
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Weather.fetch()
+                            }
+                        }
+                        NRect {
+                            visible: Config.options.bar.showResources
+                            Layout.preferredHeight: pillSize
+                            implicitWidth: resRow.implicitWidth + Config.options.bar.pillPadding
+                            corner: Tokens.rounding.xxlarge
+                            fill: "bg1"
+                            stroke: "subtle"
+                            shadow: Config.options.bar.shadow
+                            RowLayout {
+                                id: resRow
+                                anchors.centerIn: parent
+                                spacing: 10
+                                RowLayout {
+                                    spacing: 4
+                                    NText {
+                                        kind: "caption"
+                                        color: Theme.fg3
+                                        text: "CPU"
+                                    }
+                                    NText {
+                                        kind: "small"
+                                        semibold: true
+                                        text: Math.round(Resources.cpu * 100) + "%"
+                                    }
+                                }
+                                RowLayout {
+                                    spacing: 4
+                                    NText {
+                                        kind: "caption"
+                                        color: Theme.fg3
+                                        text: "MEM"
+                                    }
+                                    NText {
+                                        kind: "small"
+                                        semibold: true
+                                        text: Math.round(Resources.mem * 100) + "%"
+                                    }
+                                }
+                            }
                         }
                     }
                 }
 
-                NRect {
+                Item {
                     anchors.right: parent.right
-                    anchors.rightMargin: 0
                     anchors.verticalCenter: parent.verticalCenter
                     implicitHeight: pillSize
-                    implicitWidth: trayRow.implicitWidth + Config.options.bar.pillPadding
+                    implicitWidth: rightRow.implicitWidth
+                    RowLayout {
+                        id: rightRow
+                        anchors.fill: parent
+                        spacing: 8
+                        NRect {
+                            visible: Mpris.active !== null
+                            Layout.preferredHeight: pillSize
+                            implicitWidth: mediaRow.implicitWidth + 20
+                            corner: Tokens.rounding.xxlarge
+                            fill: "bg1"
+                            stroke: "subtle"
+                            shadow: Config.options.bar.shadow
+                            RowLayout {
+                                id: mediaRow
+                                anchors.centerIn: parent
+                                spacing: 8
+                                NRoundedImage {
+                                    id: barArt
+                                    implicitWidth: 32
+                                    implicitHeight: 32
+                                    source: Mpris.artUrl
+                                    imgRadius: Tokens.rounding.small
+                                    NIcon {
+                                        anchors.centerIn: parent
+                                        visible: !barArt.imgReady
+                                        name: "music_note_1"
+                                        iconSize: 16
+                                        color: Theme.fg3
+                                    }
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    NText {
+                                        Layout.maximumWidth: 140
+                                        elide: Text.ElideRight
+                                        kind: "small"
+                                        semibold: true
+                                        text: Mpris.title || "Unknown"
+                                    }
+                                    NText {
+                                        Layout.maximumWidth: 140
+                                        elide: Text.ElideRight
+                                        kind: "caption"
+                                        color: Theme.fg3
+                                        text: Mpris.artist
+                                    }
+                                }
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleNflyout()
+                            }
+                        }
+                        NRect {
+                            Layout.preferredHeight: pillSize
+                            implicitWidth: trayRow.implicitWidth + Config.options.bar.pillPadding
                     corner: Tokens.rounding.xxlarge
                     fill: "bg1"
                     stroke: "subtle"
@@ -164,14 +318,54 @@ Scope {
                             iconSize: 18
                             color: Theme.fg2
                         }
-                        NIcon {
+                        RowLayout {
                             visible: Config.options.bar.showBattery && Battery.ready
-                            name: Battery.icon
-                            iconSize: 18
-                            color: Battery.stateColor !== "" ? Battery.stateColor : Theme.fg2
+                            spacing: 2
+                            NIcon {
+                                name: Battery.icon
+                                iconSize: 18
+                                color: Battery.stateColor !== "" ? Battery.stateColor : Theme.fg2
+                            }
+                            NIcon {
+                                visible: Battery.charging && !Battery.critical
+                                name: "flash"
+                                filled: true
+                                iconSize: 11
+                                color: Theme.brandFg1
+                            }
+                        }
+                        Item {
+                            implicitWidth: 32
+                            implicitHeight: 32
+                            NIconButton {
+                                anchors.fill: parent
+                                name: Notifs.dnd ? "weather_moon" : "alert"
+                                restColor: Notifs.dnd ? Theme.brandBg : (Ui.notifOpen ? Theme.brandFg1 : Theme.fg2)
+                                onClicked: Ui.toggleNotif()
+                            }
+                            Rectangle {
+                                visible: Notifs.unread > 0
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+                                anchors.topMargin: 2
+                                anchors.rightMargin: 2
+                                implicitWidth: Math.max(16, badgeText.implicitWidth + 8)
+                                implicitHeight: 16
+                                radius: 8
+                                color: "#d13438"
+                                NText {
+                                    id: badgeText
+                                    anchors.centerIn: parent
+                                    kind: "caption"
+                                    color: "#ffffff"
+                                    text: Notifs.unread > 99 ? "99+" : Notifs.unread
+                                }
+                            }
                         }
                     }
                 }
+            }
+        }
 
                 NRect {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -319,14 +513,8 @@ Scope {
                                 }
                             }
                         }
-
-                        NText {
-                            visible: Config.options.bar.showActiveWindow
-                            Layout.maximumWidth: 180
-                            elide: Text.ElideMiddle
-                            kind: "small"
-                            color: Theme.fg3
-                            text: ToplevelManager.activeToplevel?.appId ?? ToplevelManager.activeToplevel?.title ?? ""
+                        PinnedApps {
+                            visible: Config.options.bar.pinnedApps.length > 0
                         }
                     }
                 }
@@ -477,6 +665,14 @@ Scope {
                             name: Battery.icon
                             iconSize: 18
                             color: Battery.stateColor !== "" ? Battery.stateColor : Theme.fg2
+                        }
+                        NIcon {
+                            Layout.alignment: Qt.AlignHCenter
+                            visible: Config.options.bar.showBattery && Battery.ready && Battery.charging && !Battery.critical
+                            name: "flash"
+                            filled: true
+                            iconSize: 11
+                            color: Theme.brandFg1
                         }
                     }
 
