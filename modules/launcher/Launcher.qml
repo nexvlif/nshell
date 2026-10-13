@@ -41,18 +41,25 @@ Scope {
             property string query: ""
             property var results: []
 
+            Connections {
+                target: DesktopEntries.applications
+                function onValuesChanged() {
+                    if (Ui.launcherOpen)
+                        win.rebuild();
+                }
+            }
+
             function rebuild(): void {
                 const q = win.query.toLowerCase().trim();
                 const out = [];
-                const apps = DesktopEntries.applications.values.filter(a => !a.noDisplay);
+                const apps = DesktopEntries.applications.values.filter(a => !a.noDisplay).sort((a, b) => a.name.localeCompare(b.name));
                 const matched = q ? apps.filter(a => (a.name + " " + (a.genericName || "") + " " + a.id).toLowerCase().includes(q)) : apps;
-                const top = matched.slice(0, 7);
-                if (top.length > 0) {
+                if (matched.length > 0) {
                     out.push({
                         kind: "header",
                         name: "Applications"
                     });
-                    for (const a of top)
+                    for (const a of matched)
                         out.push({
                             kind: "app",
                             name: a.name,
@@ -138,7 +145,7 @@ Scope {
                 if (item.kind === "app") {
                     Ui.closeAll();
                     if (item.entry.runInTerminal)
-                        Quickshell.execDetached(["xdg-terminal-exec", ...item.entry.command]);
+                        Quickshell.execDetached(["kitty", "--", ...item.entry.command]);
                     else
                         item.entry.execute();
                 } else if (item.kind === "cmd") {
