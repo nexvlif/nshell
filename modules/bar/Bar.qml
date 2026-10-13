@@ -289,49 +289,69 @@ Scope {
                                 implicitWidth: nixed ? 0 : 20
                                 implicitHeight: 20
                                 visible: !nixed
-                                Image {
+                                TrayIcon {
                                     anchors.fill: parent
-                                    source: modelData.icon
-                                    sourceSize.width: 18
-                                    sourceSize.height: 18
-                                }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                    onClicked: mouse => {
-                                        if (mouse.button === Qt.LeftButton)
-                                            modelData.activate();
-                                        else
-                                            modelData.secondaryActivate();
-                                    }
+                                    item: modelData
+                                    barPos: pos
                                 }
                             }
                         }
-                        NIcon {
-                            name: Network.icon
-                            iconSize: 18
-                            color: Network.connected ? Theme.fg2 : Theme.fg3
-                        }
-                        NIcon {
-                            visible: Config.options.bar.showVolume
-                            name: Audio.muted ? "speaker_mute" : "speaker_2"
-                            iconSize: 18
-                            color: Theme.fg2
-                        }
-                        RowLayout {
-                            visible: Config.options.bar.showBattery && Battery.ready
-                            spacing: 2
+                        Item {
+                            implicitWidth: 20
+                            implicitHeight: 20
                             NIcon {
-                                name: Battery.icon
+                                anchors.centerIn: parent
+                                name: Network.icon
                                 iconSize: 18
-                                color: Battery.stateColor !== "" ? Battery.stateColor : Theme.fg2
+                                color: Network.connected ? Theme.fg2 : Theme.fg3
                             }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleControl()
+                            }
+                        }
+                        Item {
+                            visible: Config.options.bar.showVolume
+                            implicitWidth: 20
+                            implicitHeight: 20
                             NIcon {
-                                visible: Battery.charging && !Battery.critical
-                                name: "flash"
-                                filled: true
-                                iconSize: 11
-                                color: Theme.brandFg1
+                                anchors.centerIn: parent
+                                name: Audio.muted ? "speaker_mute" : "speaker_2"
+                                iconSize: 18
+                                color: Theme.fg2
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleControl()
+                            }
+                        }
+                        Item {
+                            visible: Config.options.bar.showBattery && Battery.ready
+                            implicitWidth: battRow.implicitWidth
+                            implicitHeight: 20
+                            RowLayout {
+                                id: battRow
+                                anchors.centerIn: parent
+                                spacing: 2
+                                NIcon {
+                                    name: Battery.icon
+                                    iconSize: 18
+                                    color: Battery.stateColor !== "" ? Battery.stateColor : Theme.fg2
+                                }
+                                NIcon {
+                                    visible: Battery.charging && !Battery.critical
+                                    name: "flash"
+                                    filled: true
+                                    iconSize: 11
+                                    color: Theme.brandFg1
+                                }
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleControl()
                             }
                         }
                         Item {
@@ -628,36 +648,45 @@ Scope {
                                 implicitWidth: 20
                                 implicitHeight: nixed ? 0 : 20
                                 visible: !nixed
-                                Image {
+                                TrayIcon {
                                     anchors.fill: parent
-                                    source: modelData.icon
-                                    sourceSize.width: 18
-                                    sourceSize.height: 18
-                                }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                    onClicked: mouse => {
-                                        if (mouse.button === Qt.LeftButton)
-                                            modelData.activate();
-                                        else
-                                            modelData.secondaryActivate();
-                                    }
+                                    item: modelData
+                                    barPos: pos
                                 }
                             }
                         }
-                        NIcon {
+                        Item {
                             Layout.alignment: Qt.AlignHCenter
-                            name: Network.icon
-                            iconSize: 18
-                            color: Network.connected ? Theme.fg2 : Theme.fg3
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            NIcon {
+                                anchors.centerIn: parent
+                                name: Network.icon
+                                iconSize: 18
+                                color: Network.connected ? Theme.fg2 : Theme.fg3
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleControl()
+                            }
                         }
-                        NIcon {
+                        Item {
                             Layout.alignment: Qt.AlignHCenter
                             visible: Config.options.bar.showVolume
-                            name: Audio.muted ? "speaker_mute" : "speaker_2"
-                            iconSize: 18
-                            color: Theme.fg2
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            NIcon {
+                                anchors.centerIn: parent
+                                name: Audio.muted ? "speaker_mute" : "speaker_2"
+                                iconSize: 18
+                                color: Theme.fg2
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleControl()
+                            }
                         }
                         NIcon {
                             Layout.alignment: Qt.AlignHCenter

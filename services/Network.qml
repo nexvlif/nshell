@@ -21,12 +21,24 @@ Singleton {
         proc.running = true;
     }
 
+    function setWifiEnabled(on: bool): void {
+        root.wifiEnabled = on;
+        Quickshell.execDetached(["nmcli", "radio", "wifi", on ? "on" : "off"]);
+        repollTimer.restart();
+    }
+
     Component.onCompleted: poll()
 
     Timer {
         interval: 8000
         running: true
         repeat: true
+        onTriggered: root.poll()
+    }
+    Timer {
+        id: repollTimer
+        interval: 2000
+        repeat: false
         onTriggered: root.poll()
     }
 

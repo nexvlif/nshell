@@ -9,36 +9,56 @@ Singleton {
     property bool launcherOpen: false
     property bool sessionOpen: false
     property bool nflyoutOpen: false
+    property bool controlOpen: false
     property bool notifOpen: false
     property bool calendarOpen: false
     property bool osdOpen: false
     property string osdKind: "volume"
+    property var trayMenuOwner: null
+    property int uiRev: 0
 
     function toggleLauncher(): void {
+        uiRev++;
         sessionOpen = false;
         nflyoutOpen = false;
+        controlOpen = false;
         notifOpen = false;
         calendarOpen = false;
         launcherOpen = !launcherOpen;
     }
     function toggleSession(): void {
+        uiRev++;
         launcherOpen = false;
         nflyoutOpen = false;
+        controlOpen = false;
         notifOpen = false;
         calendarOpen = false;
         sessionOpen = !sessionOpen;
     }
     function toggleNflyout(): void {
+        uiRev++;
         launcherOpen = false;
         sessionOpen = false;
+        controlOpen = false;
         notifOpen = false;
         calendarOpen = false;
         nflyoutOpen = !nflyoutOpen;
     }
-    function toggleNotif(): void {
+    function toggleControl(): void {
+        uiRev++;
         launcherOpen = false;
         sessionOpen = false;
         nflyoutOpen = false;
+        notifOpen = false;
+        calendarOpen = false;
+        controlOpen = !controlOpen;
+    }
+    function toggleNotif(): void {
+        uiRev++;
+        launcherOpen = false;
+        sessionOpen = false;
+        nflyoutOpen = false;
+        controlOpen = false;
         calendarOpen = false;
         notifOpen = !notifOpen;
         if (notifOpen) {
@@ -47,16 +67,20 @@ Singleton {
         }
     }
     function toggleCalendar(): void {
+        uiRev++;
         launcherOpen = false;
         sessionOpen = false;
         nflyoutOpen = false;
+        controlOpen = false;
         notifOpen = false;
         calendarOpen = !calendarOpen;
     }
     function closeAll(): void {
+        uiRev++;
         launcherOpen = false;
         sessionOpen = false;
         nflyoutOpen = false;
+        controlOpen = false;
         notifOpen = false;
         calendarOpen = false;
     }

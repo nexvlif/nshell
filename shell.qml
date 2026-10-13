@@ -5,6 +5,7 @@ import qs.modules.bar
 import qs.modules.launcher
 import qs.modules.session
 import qs.modules.nflyout
+import qs.modules.controlcenter
 import qs.modules.calendar
 import qs.modules.activewindow
 import qs.modules.shortcuts
@@ -28,6 +29,7 @@ ShellRoot {
     Launcher {}
     SessionMenu {}
     NFlyout {}
+    ControlCenter {}
     Calendar {}
     Shortcuts {}
     Notifications {}
