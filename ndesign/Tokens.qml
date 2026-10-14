@@ -3,12 +3,9 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// OneUI 9 design tokens. Single theme — no variants.
 Singleton {
     id: root
 
-    // Deprecated alias — always true. Kept so old QML referencing
-    // Tokens.material doesn't break. New code shouldn't use it.
     readonly property bool material: true
 
     readonly property QtObject rounding: QtObject {

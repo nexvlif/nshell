@@ -88,26 +88,33 @@ Scope {
                         spacing: 8
                         NRect {
                             Layout.preferredHeight: pillSize
-                            implicitWidth: clockCol.implicitWidth + Config.options.bar.pillPadding
+                            implicitWidth: clockRow.implicitWidth + Config.options.bar.pillPadding
                             corner: Tokens.rounding.xxlarge
                             fill: "bg1"
                             stroke: "subtle"
                             shadow: Config.options.bar.shadow
                             border.width: Ui.calendarOpen ? 2 : 1
                             border.color: Ui.calendarOpen ? Theme.brandBg : Theme.stroke2
-                            ColumnLayout {
-                                id: clockCol
+                            RowLayout {
+                                id: clockRow
                                 anchors.centerIn: parent
-                                spacing: 0
+                                spacing: 8
+                                NIcon {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    name: "schedule"
+                                    filled: Ui.calendarOpen
+                                    iconSize: 18
+                                    color: Ui.calendarOpen ? Theme.fg1 : Theme.fg2
+                                }
                                 NText {
-                                    Layout.alignment: Qt.AlignHCenter
+                                    Layout.alignment: Qt.AlignVCenter
                                     kind: "body"
                                     semibold: true
                                     text: Config.options.bar.clock12h ? Time.timeShort : Time.format("HH:mm")
                                 }
                                 NText {
-                                    Layout.alignment: Qt.AlignHCenter
-                                    kind: "caption"
+                                    Layout.alignment: Qt.AlignVCenter
+                                    kind: "small"
                                     color: Theme.fg3
                                     text: Time.dateShort
                                     visible: Config.options.bar.showDate
@@ -313,6 +320,22 @@ Scope {
                             }
                         }
                         Item {
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            NIcon {
+                                anchors.centerIn: parent
+                                name: Bluetooth.icon
+                                filled: Bluetooth.connectedName !== ""
+                                iconSize: 18
+                                color: Bluetooth.connectedName !== "" ? Theme.fg2 : Theme.fg3
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleControl()
+                            }
+                        }
+                        Item {
                             visible: Config.options.bar.showVolume
                             implicitWidth: 20
                             implicitHeight: 20
@@ -399,80 +422,16 @@ Scope {
 
                         NAvatar {
                             diameter: Config.options.bar.avatarSize
-                            source: "file://" + Quickshell.env("HOME") + "/Pictures/pp.jpg" // It will be dynamic later
+                            source: "file://" + Quickshell.env("HOME") + "/Pictures/pp.jpg"
                             onClicked: Ui.toggleSession()
                         }
 
-                        // search pill inset — beranimasi saat palette terbuka
-                        Rectangle {
-                            id: searchPill
+                        NIconButton {
                             visible: Config.options.bar.showSearch
-                            implicitWidth: Config.options.bar.searchWidth
-                            implicitHeight: 40
-                            radius: Tokens.rounding.pill
-                            color: Theme.surfaceContainerHigh
-                            border.width: 0
-                            border.color: Ui.launcherOpen ? Theme.brandBg : Theme.stroke2
-                            transformOrigin: Item.Center
-                            Behavior on border.color {
-                                ColorAnimation {
-                                    duration: Tokens.anim.fast
-                                }
-                            }
-                            SequentialAnimation {
-                                id: searchPulse
-                                ScaleAnimator {
-                                    target: searchPill
-                                    from: 1
-                                    to: 0.94
-                                    duration: 90
-                                }
-                                ScaleAnimator {
-                                    target: searchPill
-                                    from: 0.94
-                                    to: 1
-                                    duration: 140
-                                    easing.type: Easing.OutBack
-                                }
-                            }
-                            Connections {
-                                target: Ui
-                                function onLauncherOpenChanged() {
-                                    if (Ui.launcherOpen)
-                                        searchPulse.restart();
-                                }
-                            }
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 12
-                                anchors.rightMargin: 12
-                                spacing: 8
-                                NIcon {
-                                    name: "search"
-                                    iconSize: 16
-                                    color: Ui.launcherOpen ? Theme.brandFg1 : Theme.fg3
-                                    Behavior on color {
-                                        ColorAnimation {
-                                            duration: Tokens.anim.fast
-                                        }
-                                    }
-                                }
-                                NText {
-                                    Layout.fillWidth: true
-                                    elide: Text.ElideRight
-                                    kind: "small"
-                                    color: Theme.fg3
-                                    text: "Type here to search"
-                                }
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    if (!Ui.launcherOpen)
-                                        Ui.toggleLauncher();
-                                }
-                            }
+                            name: "search"
+                            glyphSize: 20
+                            restColor: Ui.launcherOpen ? Theme.fg1 : Theme.fg2
+                            onClicked: Ui.toggleLauncher()
                         }
 
                         RowLayout {
@@ -483,7 +442,7 @@ Scope {
                                 delegate: Rectangle {
                                     required property var modelData
                                     visible: modelData.monitor?.name === win.screen.name
-                                    // end4 M3: active pill stretches, inactive is a dot/short pill.
+
                                     implicitWidth: modelData.focused ? 48 : 32
                                     implicitHeight: 32
                                     radius: Tokens.rounding.pill
@@ -538,6 +497,32 @@ Scope {
                         }
                         PinnedApps {
                             visible: Config.options.bar.pinnedApps.length > 0
+                        }
+                        RowLayout {
+                            visible: Config.options.bar.showTools
+                            spacing: 0
+                            NIconButton {
+                                name: "photo_camera"
+                                glyphSize: 20
+                                onClicked: Capture.screenshot()
+                            }
+                            NIconButton {
+                                name: "colorize"
+                                glyphSize: 20
+                                onClicked: Capture.pick()
+                            }
+                            NIconButton {
+                                name: "videocam"
+                                glyphSize: 20
+                                filled: Capture.recording
+                                restColor: Capture.recording ? Theme.error : Theme.fg2
+                                onClicked: Capture.toggleRecord()
+                            }
+                            NIconButton {
+                                name: "photo_library"
+                                glyphSize: 20
+                                onClicked: Capture.gallery()
+                            }
                         }
                     }
                 }

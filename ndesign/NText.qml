@@ -2,7 +2,7 @@ import QtQuick
 import qs.ndesign
 
 Text {
-    property string kind: "body" // caption(10) | small(12) | body(14) | title(16) | subtitle(20) | clock(12)
+    property string kind: "body"
     property bool semibold: kind === "title" || kind === "subtitle"
     color: Theme.fg1
     font.family: Theme.fontFamily

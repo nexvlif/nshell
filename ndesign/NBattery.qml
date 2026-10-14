@@ -3,12 +3,9 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import qs.ndesign
 
-// OneUI-style battery indicator (ported from end4-pC's ClippedProgressBar +
-// BatteryIndicator): rounded bar + nub tip, percentage text punched through
-// the fill, filled bolt when charging, red when critical.
 Item {
     id: root
-    property real percent: 1 // 0..1
+    property real percent: 1
     property bool charging: false
     property bool critical: false
     property bool vertical: false

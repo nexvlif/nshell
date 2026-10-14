@@ -3,7 +3,6 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Aksi sesi: dipakai palette + menu sesi.
 Singleton {
     id: root
 
