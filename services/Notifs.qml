@@ -8,6 +8,7 @@ import qs.services
 Singleton {
     id: root
     property var current: null
+    property var queue: []
     onCurrentChanged: console.log("NSHELLDBG current now: " + (current ? current.summary : "null"))
     property var seenIds: ({})
     property int rev: 0
@@ -36,12 +37,34 @@ Singleton {
     }
     function clearPopup(): void {
         popupTimer.stop();
+        root.queue = [];
         root.current = null;
     }
     function popupFor(n): void {
         root.current = n;
         popupTimer.interval = (n && n.expireTimeout > 0) ? n.expireTimeout : ((n && n.urgency === NotificationUrgency.Critical) ? 8000 : 5000);
         popupTimer.restart();
+    }
+    function enqueue(n): void {
+        if (root.current === null && root.queue.length === 0) {
+            popupFor(n);
+            return;
+        }
+        if (n === root.current)
+            return;
+        const q = root.queue.slice();
+        if (!q.includes(n))
+            q.push(n);
+        root.queue = q;
+    }
+    function dequeue(): void {
+        const alive = root.queue.filter(x => x !== root.current && root.items.includes(x));
+        const next = alive.length > 0 ? alive[0] : null;
+        root.queue = alive.slice(1);
+        if (next)
+            popupFor(next);
+        else
+            root.current = null;
     }
     function markSeen(): void {
         const s = {};
@@ -50,16 +73,22 @@ Singleton {
         root.seenIds = s;
     }
     function dismiss(n): void {
-        if (n) {
-            if (root.current === n)
-                root.current = null;
+        if (!n)
+            return;
+        root.queue = root.queue.filter(x => x !== n);
+        if (root.current === n) {
+            popupTimer.stop();
             n.dismiss();
-            root.rev++;
+            dequeue();
+        } else {
+            n.dismiss();
         }
+        root.rev++;
     }
     function dismissAll(): void {
         for (const t of root.items)
             t.dismiss();
+        root.queue = [];
         root.current = null;
         root.rev++;
     }
@@ -67,7 +96,7 @@ Singleton {
     Timer {
         id: popupTimer
         repeat: false
-        onTriggered: root.current = null
+        onTriggered: root.dequeue()
     }
 
     NotificationServer {
@@ -83,7 +112,7 @@ Singleton {
             n.tracked = true;
             root.rev++;
             if (!root.dnd)
-                root.popupFor(n);
+                root.enqueue(n);
             console.log("NSHELLDBG popup current set: " + (root.current !== null));
         }
     }

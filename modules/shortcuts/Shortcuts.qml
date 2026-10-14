@@ -50,6 +50,20 @@ Scope {
 
     GlobalShortcut {
         appid: "nshell"
+        name: "settingsToggle"
+        description: "Toggle settings"
+        property bool armed: false
+        onPressed: armed = true
+        onReleased: {
+            if (armed) {
+                armed = false;
+                Ui.toggleSettings();
+            }
+        }
+    }
+
+    GlobalShortcut {
+        appid: "nshell"
         name: "volumeUp"
         description: "Volume up + OSD"
         onPressed: Audio.increment(0.05)

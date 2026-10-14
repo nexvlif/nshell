@@ -8,16 +8,18 @@ Singleton {
     id: root
     property real cpu: 0
     property real mem: 0
+    property real disk: 0
     property bool ready: false
     property var prev: null
 
     function refresh(): void {
         cpuProc.running = true;
         memProc.running = true;
+        diskProc.running = true;
     }
 
     function parseCpu(t: string): void {
-        const parts = t.trim().split(/\s+/).map(Number);
+        const parts = t.trim().split(/\s+/).slice(1).map(Number);
         if (parts.length < 8 || parts.some(isNaN))
             return;
         const idle = parts[3] + parts[4];
@@ -74,6 +76,23 @@ Singleton {
         command: ["sh", "-c", "grep -E '^(MemTotal|MemAvailable):' /proc/meminfo"]
         stdout: StdioCollector {
             onStreamFinished: root.parseMem(text)
+        }
+    }
+
+    Process {
+        id: diskProc
+        command: ["sh", "-c", "df / | tail -1"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                for (const p of text.trim().split(/\s+/)) {
+                    if (p.endsWith("%")) {
+                        const v = parseInt(p.slice(0, -1), 10);
+                        if (!isNaN(v))
+                            root.disk = Math.max(0, Math.min(1, v / 100));
+                        break;
+                    }
+                }
+            }
         }
     }
 }

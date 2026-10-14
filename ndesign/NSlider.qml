@@ -55,15 +55,15 @@ Rectangle {
         color: root.trackColor
 
         Rectangle {
-            visible: !root.wavy
+            visible: !root.wavy && root.ratio > 0.005
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.max(root.trackR * 2, parent.width * root.ratio - root.handleW / 2 - root.gap)
+            width: Math.max(0, parent.width * root.ratio - root.handleW / 2 - root.gap)
             height: parent.height
             topLeftRadius: root.trackR
             bottomLeftRadius: root.trackR
-            topRightRadius: 2
-            bottomRightRadius: 2
+            topRightRadius: root.ratio > 0.995 ? root.trackR : 2
+            bottomRightRadius: root.ratio > 0.995 ? root.trackR : 2
             color: root.hiColor
         }
 

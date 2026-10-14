@@ -154,6 +154,22 @@ Scope {
                 }
             }
 
+            function isPinned(id: string): bool {
+                const p = Config.options.bar.pinnedApps ?? [];
+                return p.includes(id);
+            }
+            function togglePin(entry): void {
+                if (!entry || !entry.id)
+                    return;
+                const p = Array.from(Config.options.bar.pinnedApps ?? []);
+                const i = p.indexOf(entry.id);
+                if (i >= 0)
+                    p.splice(i, 1);
+                else
+                    p.push(entry.id);
+                Config.set("bar.pinnedApps", p);
+            }
+
             Rectangle {
                 anchors.fill: parent
                 color: Theme.overlay
@@ -248,12 +264,14 @@ Scope {
                                     anchors.leftMargin: 12
                                     anchors.rightMargin: 12
                                     spacing: 12
-                                    IconImage {
+                                    NAppIcon {
                                         Layout.alignment: Qt.AlignVCenter
+                                        Layout.preferredWidth: 28
+                                        Layout.preferredHeight: 28
                                         visible: modelData.kind === "app"
-                                        asynchronous: true
-                                        source: modelData.kind === "app" ? Quickshell.iconPath(modelData.entry?.icon, "image-missing") : ""
-                                        implicitSize: 28
+                                        source: modelData.kind === "app" ? Quickshell.iconPath(modelData.entry?.icon, "") : ""
+                                        letter: (modelData.name || "?").substring(0, 1).toUpperCase()
+                                        radius: 8
                                     }
                                     NIcon {
                                         Layout.alignment: Qt.AlignVCenter
@@ -262,6 +280,14 @@ Scope {
                                         filled: list.currentIndex === index
                                         iconSize: 22
                                         color: list.currentIndex === index ? Theme.brandFg1 : Theme.fg2
+                                    }
+                                    NIcon {
+                                        Layout.alignment: Qt.AlignVCenter
+                                        visible: modelData.kind === "app" && win.isPinned(modelData.entry?.id ?? "")
+                                        name: "push_pin"
+                                        filled: true
+                                        iconSize: 16
+                                        color: Theme.fg3
                                     }
                                     ColumnLayout {
                                         Layout.fillWidth: true
@@ -287,12 +313,19 @@ Scope {
                                 id: hoverArea
                                 anchors.fill: parent
                                 hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
                                 cursorShape: modelData.kind === "header" ? Qt.ArrowCursor : Qt.PointingHandCursor
                                 onEntered: {
                                     if (modelData.kind !== "header")
                                         list.currentIndex = index;
                                 }
-                                onClicked: win.activateAt(index)
+                                onClicked: mouse => {
+                                    if (mouse.button === Qt.RightButton && modelData.kind === "app") {
+                                        win.togglePin(modelData.entry);
+                                        return;
+                                    }
+                                    win.activateAt(index);
+                                }
                             }
                         }
                     }
@@ -317,7 +350,7 @@ Scope {
                         horizontalAlignment: Text.AlignHCenter
                         kind: "caption"
                         color: Theme.fg3
-                        text: "↑↓ navigate · ↵ open · esc close"
+                        text: "↑↓ navigate · ↵ open · right-click pin · esc close"
                     }
                 }
             }

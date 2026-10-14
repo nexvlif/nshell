@@ -118,6 +118,28 @@ Singleton {
             property JsonObject osd: JsonObject {
                 property int timeout: 1200
             }
+            property JsonObject wallpaper: JsonObject {
+                property string path: ""
+                property string mode: "fill"
+            }
+            property JsonObject widgets: JsonObject {
+                property bool enabled: true
+                property bool locked: true
+                property string pos: ""
+                property bool clock: true
+                property bool week: true
+                property bool stats: true
+                property bool weather: true
+                property bool worldclock: true
+                property bool todo: true
+                property bool notes: true
+                property bool timers: true
+                property bool media: true
+                property bool battery: true
+                property bool net: true
+                property bool image: true
+                property string imagePath: ""
+            }
         }
     }
 }

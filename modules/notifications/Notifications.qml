@@ -73,11 +73,11 @@ Scope {
                             implicitHeight: 40
                             radius: Tokens.rounding.large
                             color: Theme.surfaceContainerHigh
-                            IconImage {
-                                anchors.centerIn: parent
-                                asynchronous: true
-                                implicitSize: 28
-                                source: (Notifs.current && Notifs.current.image) || Quickshell.iconPath(Notifs.current ? Notifs.current.appIcon : "", "dialog-information")
+                            NAppIcon {
+                                anchors.fill: parent
+                                source: (Notifs.current && Notifs.current.image) || Quickshell.iconPath(Notifs.current ? Notifs.current.appIcon : "", "")
+                                letter: ((Notifs.current && Notifs.current.appName) || "?").substring(0, 1).toUpperCase()
+                                radius: Tokens.rounding.large
                             }
                         }
                         ColumnLayout {
@@ -271,11 +271,11 @@ Scope {
                                         implicitHeight: 36
                                         radius: Tokens.rounding.medium
                                         color: Theme.surfaceContainerHigh
-                                        IconImage {
-                                            anchors.centerIn: parent
-                                            asynchronous: true
-                                            implicitSize: 22
-                                            source: notif.image || Quickshell.iconPath(notif.appIcon, "dialog-information")
+                                        NAppIcon {
+                                            anchors.fill: parent
+                                            source: notif.image || Quickshell.iconPath(notif.appIcon, "")
+                                            letter: (notif.appName || "?").substring(0, 1).toUpperCase()
+                                            radius: Tokens.rounding.medium
                                         }
                                     }
                                     NText {

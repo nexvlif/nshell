@@ -9,10 +9,17 @@ import qs.modules.nflyout
 import qs.modules.controlcenter
 import qs.modules.clipboard
 import qs.modules.calendar
+import qs.modules.screenshot
+import qs.modules.recording
+import qs.modules.gallery
 import qs.modules.activewindow
 import qs.modules.shortcuts
 import qs.modules.notifications
 import qs.modules.osd
+import qs.modules.widgets
+import qs.modules.wallpaper
+import qs.modules.settings
+import qs.modules.filemanager
 import qs.services
 
 ShellRoot {
@@ -28,6 +35,18 @@ ShellRoot {
         }
         function toggleControl(): void {
             Ui.toggleControl();
+        }
+        function toggleNotif(): void {
+            Ui.toggleNotif();
+        }
+        function toggleLauncher(): void {
+            Ui.toggleLauncher();
+        }
+        function toggleFiles(): void {
+            Ui.toggleFileManager();
+        }
+        function toggleSettings(): void {
+            Ui.toggleSettings();
         }
     }
 
@@ -57,7 +76,17 @@ ShellRoot {
     ControlCenter {}
     ClipPanel {}
     Calendar {}
+    ScreenshotPanel {}
+    ScreenshotSelector {}
+    ScreenshotCountdown {}
+    RecordingPanel {}
+    GalleryPanel {}
     Shortcuts {}
     Notifications {}
     Osd {}
+    Widgets {}
+    ImagePicker {}
+    FileManager {}
+    Wallpaper {}
+    Settings {}
 }

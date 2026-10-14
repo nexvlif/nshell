@@ -167,8 +167,8 @@ Scope {
                         visible: Brightness.ready
                         spacing: 8
                         Item {
-                            Layout.preferredWidth: 32
-                            Layout.preferredHeight: 32
+                            Layout.preferredWidth: 40
+                            Layout.preferredHeight: 40
                             Layout.alignment: Qt.AlignVCenter
                             NIcon {
                                 anchors.centerIn: parent

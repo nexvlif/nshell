@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Widgets
 import qs.ndesign
 import qs.services
 
@@ -42,18 +41,33 @@ RowLayout {
                     duration: Tokens.anim.faster
                 }
             }
-            IconImage {
+            NAppIcon {
                 anchors.centerIn: parent
-                asynchronous: true
-                source: parent.entry ? Quickshell.iconPath(parent.entry.icon, "image-missing") : ""
-                implicitSize: 26
+                width: 26
+                height: 26
+                visible: parent.entry !== null
+                source: parent.entry ? Quickshell.iconPath(parent.entry.icon, "") : ""
+                letter: (parent.entry ? parent.entry.name : "?").substring(0, 1).toUpperCase()
+                radius: 8
             }
             MouseArea {
                 id: pinHover
                 anchors.fill: parent
                 hoverEnabled: true
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.launch(parent.entry)
+                onClicked: mouse => {
+                    if (mouse.button === Qt.RightButton) {
+                        const p = Array.from(Config.options.bar.pinnedApps ?? []);
+                        const i = p.indexOf(modelData);
+                        if (i >= 0) {
+                            p.splice(i, 1);
+                            Config.set("bar.pinnedApps", p);
+                        }
+                        return;
+                    }
+                    root.launch(parent.entry);
+                }
             }
         }
     }

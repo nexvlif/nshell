@@ -6,6 +6,8 @@ import Quickshell.Wayland
 import Quickshell.Services.SystemTray
 import qs.modules.activewindow
 import qs.modules.pinned
+import qs.modules.screenshot
+import qs.modules.recording
 import qs.ndesign
 import qs.services
 
@@ -501,27 +503,23 @@ Scope {
                         RowLayout {
                             visible: Config.options.bar.showTools
                             spacing: 0
-                            NIconButton {
-                                name: "photo_camera"
-                                glyphSize: 20
-                                onClicked: Capture.screenshot()
-                            }
+                            ScreenshotBarButton {}
+                            RecordingBarButton {}
                             NIconButton {
                                 name: "colorize"
                                 glyphSize: 20
                                 onClicked: Capture.pick()
                             }
                             NIconButton {
-                                name: "videocam"
-                                glyphSize: 20
-                                filled: Capture.recording
-                                restColor: Capture.recording ? Theme.error : Theme.fg2
-                                onClicked: Capture.toggleRecord()
-                            }
-                            NIconButton {
                                 name: "photo_library"
                                 glyphSize: 20
-                                onClicked: Capture.gallery()
+                                onClicked: Ui.toggleGallery()
+                            }
+                            NIconButton {
+                                name: "folder"
+                                glyphSize: 20
+                                restColor: Ui.fileOpen ? Theme.fg1 : Theme.fg2
+                                onClicked: Ui.toggleFileManager()
                             }
                         }
                     }
@@ -693,6 +691,22 @@ Scope {
                             percent: Battery.percent
                             charging: Battery.charging
                             critical: Battery.critical
+                        }
+                        NIconButton {
+                            Layout.alignment: Qt.AlignHCenter
+                            visible: Config.options.bar.showTools
+                            name: "photo_camera"
+                            glyphSize: 20
+                            restColor: Ui.screenshotOpen ? Theme.fg1 : Theme.fg2
+                            onClicked: Ui.toggleScreenshot()
+                        }
+                        NIconButton {
+                            Layout.alignment: Qt.AlignHCenter
+                            visible: Config.options.bar.showTools
+                            name: Capture.recording ? "stop_circle" : "videocam"
+                            glyphSize: 20
+                            restColor: Ui.recordingOpen ? Theme.fg1 : Capture.recording ? Theme.error : Theme.fg2
+                            onClicked: Ui.toggleRecording()
                         }
                     }
 
