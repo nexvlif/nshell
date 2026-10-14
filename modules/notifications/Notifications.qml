@@ -24,9 +24,11 @@ Scope {
                 top: true
                 right: true
             }
+            property string pos: Config.options.bar.position
+            readonly property var barM: Config.options.bar.margins[pos] ?? Config.options.bar.margins["bottom"]
             margins {
-                top: 12
-                right: 12
+                top: pos === "top" ? Config.options.bar.height + barM.top + barM.bottom + 12 : 12
+                right: pos === "right" ? Config.options.bar.height + barM.left + barM.right + 12 : 12
             }
             implicitWidth: 360
             implicitHeight: toastCol.implicitHeight + 24
@@ -42,9 +44,9 @@ Scope {
 
             NRect {
                 anchors.fill: parent
-                corner: Tokens.rounding.xlarge
+                corner: Tokens.rounding.popover
                 fill: "bg1"
-                stroke: "subtle"
+                stroke: "none"
                 shadow: 16
 
                 MouseArea {
@@ -60,17 +62,17 @@ Scope {
                 ColumnLayout {
                     id: toastCol
                     anchors.fill: parent
-                    anchors.margins: 12
-                    spacing: 8
+                    anchors.margins: 16
+                    spacing: 10
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: 10
+                        spacing: 12
                         Rectangle {
                             implicitWidth: 40
                             implicitHeight: 40
-                            radius: Tokens.rounding.medium
-                            color: Theme.bg3
+                            radius: Tokens.rounding.large
+                            color: Theme.surfaceContainerHigh
                             IconImage {
                                 anchors.centerIn: parent
                                 asynchronous: true
@@ -97,7 +99,7 @@ Scope {
                             }
                         }
                         NIconButton {
-                            name: "dismiss"
+                            name: "close"
                             glyphSize: 14
                             onClicked: Notifs.dismiss(Notifs.current)
                         }
@@ -167,6 +169,10 @@ Scope {
                 left: true
                 right: true
             }
+            property string pos: Config.options.bar.position
+            readonly property var barM: Config.options.bar.margins[pos] ?? Config.options.bar.margins["bottom"]
+            readonly property int vClear: Config.options.bar.height + barM.top + barM.bottom + 12
+            readonly property int hClear: Config.options.bar.height + barM.left + barM.right + 12
 
             onVisibleChanged: {
                 if (visible)
@@ -186,20 +192,23 @@ Scope {
                 id: panel
                 focus: true
                 Keys.onEscapePressed: Ui.closeAll()
-                width: 360
+                width: 380
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
-                anchors.margins: 12
-                corner: Tokens.rounding.xlarge
+                anchors.topMargin: centerWin.pos === "top" ? centerWin.vClear : 12
+                anchors.bottomMargin: centerWin.pos === "bottom" ? centerWin.vClear : 12
+                anchors.rightMargin: centerWin.pos === "right" ? centerWin.hClear : 12
+                anchors.leftMargin: 12
+                corner: Tokens.rounding.popover
                 fill: "bg1"
-                stroke: "subtle"
+                stroke: "none"
                 shadow: 28
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 8
+                    anchors.margins: 20
+                    spacing: 12
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -210,7 +219,7 @@ Scope {
                             text: "Notifications"
                         }
                         NIconButton {
-                            name: "weather_moon"
+                            name: "do_not_disturb_on"
                             glyphSize: 16
                             restColor: Notifs.dnd ? Theme.brandBg : Theme.fg2
                             onClicked: Notifs.toggleDnd()
@@ -233,10 +242,10 @@ Scope {
                             required property var modelData
                             readonly property var notif: modelData
                             width: ListView.view.width
-                            implicitHeight: nCol.implicitHeight + 20
-                            corner: Tokens.rounding.medium
+                            implicitHeight: nCol.implicitHeight + 24
+                            corner: Tokens.rounding.large
                             fill: "bg2"
-                            stroke: "subtle"
+                            stroke: "none"
                             shadow: 0
 
                             function sendReply(): void {
@@ -252,16 +261,16 @@ Scope {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.top: parent.top
-                                anchors.margins: 10
-                                spacing: 6
+                                anchors.margins: 12
+                                spacing: 8
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    spacing: 8
+                                    spacing: 10
                                     Rectangle {
-                                        implicitWidth: 32
-                                        implicitHeight: 32
-                                        radius: Tokens.rounding.small
-                                        color: Theme.bg3
+                                        implicitWidth: 36
+                                        implicitHeight: 36
+                                        radius: Tokens.rounding.medium
+                                        color: Theme.surfaceContainerHigh
                                         IconImage {
                                             anchors.centerIn: parent
                                             asynchronous: true
@@ -277,7 +286,7 @@ Scope {
                                         text: notif.summary
                                     }
                                     NIconButton {
-                                        name: "dismiss"
+                                        name: "close"
                                         glyphSize: 12
                                         onClicked: Notifs.dismiss(notif)
                                     }
@@ -346,7 +355,7 @@ Scope {
                         NIcon {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
-                            name: "alert"
+                            name: "notifications_off"
                             iconSize: 40
                             color: Theme.fg3
                         }

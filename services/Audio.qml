@@ -7,8 +7,21 @@ import Quickshell.Services.Pipewire
 Singleton {
     id: root
     readonly property var sink: Pipewire.defaultAudioSink
+    readonly property var source: Pipewire.defaultAudioSource
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false
+    readonly property var sinks: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio)
+    readonly property var sources: Pipewire.nodes.values.filter(n => !n.isSink && !n.isStream && n.audio)
+
+    function deviceLabel(n): string {
+        return n.nickname || n.description || n.name;
+    }
+    function setDefaultSink(n): void {
+        Pipewire.preferredDefaultAudioSink = n;
+    }
+    function setDefaultSource(n): void {
+        Pipewire.preferredDefaultAudioSource = n;
+    }
 
     function setVolume(v): void {
         if (sink?.audio)

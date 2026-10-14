@@ -6,15 +6,16 @@ Rectangle {
     id: root
     property string placeholder: "Search"
     property string icon: "search"
+    property int echoMode: TextInput.Normal
     property alias text: input.text
     property alias field: input
     signal accepted
 
-    implicitHeight: 32
-    radius: Tokens.rounding.medium
-    color: Theme.bg3
-    border.width: 1
-    border.color: input.activeFocus ? Theme.brandStroke1 : Theme.stroke1
+    implicitHeight: 40
+    radius: Tokens.rounding.pill
+    color: Theme.surfaceContainerHigh
+    border.width: 0
+    border.color: input.activeFocus ? Theme.fg1 : Theme.stroke1
     Behavior on border.color {
         ColorAnimation {
             duration: Tokens.anim.fast
@@ -23,8 +24,8 @@ Rectangle {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 10
-        anchors.rightMargin: 10
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
         spacing: 8
         NIcon {
             name: root.icon
@@ -35,27 +36,11 @@ Rectangle {
             id: input
             Layout.fillWidth: true
             color: Theme.fg1
+            echoMode: root.echoMode
             font.family: Theme.fontFamily
             font.pixelSize: Tokens.font.body
             clip: true
             Keys.onReturnPressed: root.accepted()
-        }
-    }
-    // underline
-    Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.leftMargin: 1
-        anchors.rightMargin: 1
-        anchors.bottomMargin: 1
-        height: input.activeFocus ? 2 : 1
-        radius: 1
-        color: input.activeFocus ? Theme.brandBg : Theme.stroke1
-        Behavior on height {
-            NumberAnimation {
-                duration: Tokens.anim.fast
-            }
         }
     }
 }

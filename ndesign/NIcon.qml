@@ -7,14 +7,17 @@ Text {
     property bool filled: false
     property int iconSize: 20
 
-    font.family: filled ? "FluentSystemIcons-Filled" : "FluentSystemIcons-Regular"
+    font.family: "Material Symbols Lite"
     font.pixelSize: iconSize
+    font.weight: filled ? Font.DemiBold : Font.Normal
+    font.variableAxes: {
+        "FILL": filled ? 1 : 0,
+        "opsz": iconSize
+    }
     color: Theme.fg1
     verticalAlignment: Text.AlignVCenter
     horizontalAlignment: Text.AlignHCenter
-    renderType: Text.QtRendering
-    text: {
-        const key = filled ? root.name + "Filled" : root.name;
-        return NIcons[key] ?? "";
-    }
+    renderType: Text.NativeRendering
+    font.hintingPreference: Font.PreferNoHinting
+    text: root.name
 }

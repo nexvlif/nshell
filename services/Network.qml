@@ -10,15 +10,28 @@ Singleton {
     property bool connected: false
     property string ssid: ""
     property int signal: 0
+    property string iface: ""
+    property var networks: []
+    property bool scanning: false
+    property string connecting: ""
+    property string lastError: ""
 
     readonly property string icon: {
         if (!wifiEnabled || !connected)
             return "wifi_off";
-        return signal >= 60 ? "wifi_2" : "wifi_1";
+        return "wifi";
     }
 
     function poll(): void {
-        proc.running = true;
+        if (!proc.running)
+            proc.running = true;
+    }
+
+    function scan(): void {
+        if (scanProc.running)
+            return;
+        root.scanning = true;
+        scanProc.running = true;
     }
 
     function setWifiEnabled(on: bool): void {
@@ -27,7 +40,74 @@ Singleton {
         repollTimer.restart();
     }
 
-    Component.onCompleted: poll()
+    function connect(ssid: string, password: string): void {
+        if (connProc.running)
+            return;
+        root.connecting = ssid;
+        root.lastError = "";
+        if (password !== "")
+            connProc.command = ["nmcli", "device", "wifi", "connect", ssid, "password", password];
+        else
+            connProc.command = ["nmcli", "device", "wifi", "connect", ssid];
+        connProc.running = true;
+    }
+
+    function disconnect(): void {
+        if (root.iface !== "")
+            Quickshell.execDetached(["nmcli", "device", "disconnect", root.iface]);
+        repollTimer.restart();
+    }
+
+    function parseNets(text: string): void {
+        const bySsid = {};
+        const out = [];
+        for (const line of text.trim().split("\n")) {
+            if (line === "")
+                continue;
+            const parts = line.replace(/\\\\/g, "\x01").replace(/\\:/g, "\x00").split(":");
+            if (parts.length < 4)
+                continue;
+            const ssid = parts.slice(3).join(":").replace(/\x00/g, ":").replace(/\x01/g, "\\").trim();
+            if (ssid === "" || ssid === "--")
+                continue;
+            const signal = parseInt(parts[1], 10) || 0;
+            const inUse = parts[0] === "*";
+            const sec = parts[2] === "--" ? "" : parts[2];
+            if (bySsid[ssid] !== undefined) {
+                const prev = out[bySsid[ssid]];
+                prev.signal = Math.max(prev.signal, signal);
+                prev.inUse = prev.inUse || inUse;
+                if (prev.security === "" && sec !== "")
+                    prev.security = sec;
+            } else {
+                bySsid[ssid] = out.length;
+                out.push({
+                    ssid: ssid,
+                    signal: signal,
+                    security: sec,
+                    inUse: inUse
+                });
+            }
+        }
+        out.sort((a, b) => ((b.inUse ? 1 : 0) - (a.inUse ? 1 : 0)) || (b.signal - a.signal));
+        root.networks = out;
+        const cur = out.find(n => n.inUse);
+        if (cur) {
+            root.connected = true;
+            root.signal = cur.signal;
+            root.ssid = cur.ssid;
+        } else if (out.length === 0 && root.wifiEnabled) {
+        } else if (!cur) {
+            root.connected = false;
+            root.signal = 0;
+            root.ssid = "";
+        }
+    }
+
+    Component.onCompleted: {
+        poll();
+        ifaceProc.running = true;
+    }
 
     Timer {
         interval: 8000
@@ -44,23 +124,69 @@ Singleton {
 
     Process {
         id: proc
-        command: ["sh", "-c", "nmcli -t -f WIFI general; nmcli -t -f IN-USE,SIGNAL,SSID device wifi list --rescan no | grep '^\\*:' || echo 'none'"]
+        command: ["sh", "-c", "nmcli -t -f WIFI general; echo ---NETS---; nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID device wifi list --rescan no"]
         stdout: StdioCollector {
             onStreamFinished: {
-                const lines = text.trim().split("\n");
-                if (lines.length > 0)
-                    root.wifiEnabled = lines[0].indexOf("enabled") === 0;
-                if (lines.length > 1 && lines[1] !== "none") {
-                    const parts = lines[1].split(":");
-                    root.connected = true;
-                    root.signal = parseInt(parts[1], 10) || 0;
-                    root.ssid = parts.slice(2).join(":");
-                } else {
+                const marker = "---NETS---";
+                const mi = text.indexOf(marker);
+                const head = (mi >= 0 ? text.slice(0, mi) : text).trim();
+                const netText = mi >= 0 ? text.slice(mi + marker.length).trim() : "";
+                if (head !== "")
+                    root.wifiEnabled = head.split("\n")[0].indexOf("enabled") === 0;
+                if (!root.wifiEnabled) {
+                    root.networks = [];
+                    root.connected = false;
+                    root.signal = 0;
+                    root.ssid = "";
+                    return;
+                }
+                if (netText !== "" && netText !== "none")
+                    root.parseNets(netText);
+                else {
+                    root.networks = [];
                     root.connected = false;
                     root.signal = 0;
                     root.ssid = "";
                 }
             }
+        }
+    }
+
+    Process {
+        id: scanProc
+        command: ["nmcli", "-t", "-f", "IN-USE,SIGNAL,SECURITY,SSID", "device", "wifi", "list", "--rescan", "yes"]
+        stdout: StdioCollector {
+            id: scanOut
+            onStreamFinished: {
+                root.scanning = false;
+                if (text.trim() !== "" && text.trim() !== "none")
+                    root.parseNets(text);
+                repollTimer.restart();
+            }
+        }
+        onExited: exitCode => {
+            root.scanning = false;
+        }
+    }
+
+    Process {
+        id: ifaceProc
+        command: ["sh", "-c", "nmcli -t -f DEVICE,TYPE device | grep ':wifi$' | head -n 1 | cut -d: -f1"]
+        stdout: StdioCollector {
+            onStreamFinished: root.iface = text.trim()
+        }
+    }
+
+    Process {
+        id: connProc
+        stderr: StdioCollector {
+            id: connErr
+        }
+        onExited: exitCode => {
+            if (exitCode !== 0)
+                root.lastError = connErr.text.trim().split("\n").filter(l => l.indexOf("Error") >= 0).join(" ") || "Failed to connect";
+            root.connecting = "";
+            repollTimer.restart();
         }
     }
 }

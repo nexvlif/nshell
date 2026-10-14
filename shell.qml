@@ -1,11 +1,13 @@
 //@ pragma Env QS_NO_RELOAD_POPUP=1
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.modules.bar
 import qs.modules.launcher
 import qs.modules.session
 import qs.modules.nflyout
 import qs.modules.controlcenter
+import qs.modules.clipboard
 import qs.modules.calendar
 import qs.modules.activewindow
 import qs.modules.shortcuts
@@ -18,11 +20,34 @@ ShellRoot {
 
     property var _cfg: Config
 
+    IpcHandler {
+        target: "nshell"
+
+        function toggleClipboard(): void {
+            Ui.toggleClipboard();
+        }
+        function toggleControl(): void {
+            Ui.toggleControl();
+        }
+    }
+
     FontLoader {
-        source: Qt.resolvedUrl("assets/fonts/FluentSystemIcons-Regular.ttf")
+        source: Qt.resolvedUrl("assets/fonts/MaterialSymbolsLite.ttf")
     }
     FontLoader {
-        source: Qt.resolvedUrl("assets/fonts/FluentSystemIcons-Filled.ttf")
+        source: Qt.resolvedUrl("assets/fonts/Roboto-400.ttf")
+    }
+    FontLoader {
+        source: Qt.resolvedUrl("assets/fonts/Roboto-500.ttf")
+    }
+    FontLoader {
+        source: Qt.resolvedUrl("assets/fonts/Roboto-700.ttf")
+    }
+    FontLoader {
+        source: Qt.resolvedUrl("assets/fonts/RobotoMono-400.ttf")
+    }
+    FontLoader {
+        source: Qt.resolvedUrl("assets/fonts/RobotoMono-500.ttf")
     }
 
     Bar {}
@@ -30,6 +55,7 @@ ShellRoot {
     SessionMenu {}
     NFlyout {}
     ControlCenter {}
+    ClipPanel {}
     Calendar {}
     Shortcuts {}
     Notifications {}

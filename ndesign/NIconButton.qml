@@ -8,10 +8,10 @@ Rectangle {
     property color restColor: Theme.fg2
     signal clicked
 
-    implicitWidth: 32
-    implicitHeight: 32
-    radius: Tokens.rounding.medium
-    color: hoverArea.pressed ? Theme.subtlePressed : hoverArea.containsMouse ? Theme.subtleHover : "transparent"
+    implicitWidth: 40
+    implicitHeight: 40
+    radius: Tokens.rounding.pill
+    color: hoverArea.pressed ? Theme.subtlePressed : hoverArea.containsMouse ? Theme.surfaceContainerHigh : "transparent"
     Behavior on color {
         ColorAnimation {
             duration: Tokens.anim.faster
@@ -23,7 +23,7 @@ Rectangle {
         name: root.name
         filled: hoverArea.containsMouse || hoverArea.pressed
         iconSize: root.glyphSize
-        color: hoverArea.pressed ? Theme.brandIconPressed : hoverArea.containsMouse ? Theme.brandIconHover : root.restColor
+        color: hoverArea.pressed ? Theme.fg1 : hoverArea.containsMouse ? Theme.fg1 : root.restColor
         Behavior on color {
             ColorAnimation {
                 duration: Tokens.anim.faster

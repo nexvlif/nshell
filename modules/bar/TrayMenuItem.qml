@@ -47,7 +47,7 @@ ColumnLayout {
                 NIcon {
                     anchors.centerIn: parent
                     visible: root.entry.buttonType === QsMenuButtonType.CheckBox && root.entry.checkState === Qt.Checked
-                    name: "checkmark"
+                    name: "check"
                     iconSize: 14
                     color: Theme.fg1
                 }

@@ -10,6 +10,7 @@ Singleton {
     property bool sessionOpen: false
     property bool nflyoutOpen: false
     property bool controlOpen: false
+    property bool clipOpen: false
     property bool notifOpen: false
     property bool calendarOpen: false
     property bool osdOpen: false
@@ -31,6 +32,7 @@ Singleton {
     }
 
     function toggleLauncher(): void {
+        clipOpen = false;
         closeTrayMenu();
         sessionOpen = false;
         nflyoutOpen = false;
@@ -40,6 +42,7 @@ Singleton {
         launcherOpen = !launcherOpen;
     }
     function toggleSession(): void {
+        clipOpen = false;
         closeTrayMenu();
         launcherOpen = false;
         nflyoutOpen = false;
@@ -49,6 +52,7 @@ Singleton {
         sessionOpen = !sessionOpen;
     }
     function toggleNflyout(): void {
+        clipOpen = false;
         closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
@@ -58,6 +62,7 @@ Singleton {
         nflyoutOpen = !nflyoutOpen;
     }
     function toggleControl(): void {
+        clipOpen = false;
         closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
@@ -66,7 +71,17 @@ Singleton {
         calendarOpen = false;
         controlOpen = !controlOpen;
     }
+    function toggleClipboard(): void {
+        clipOpen = !clipOpen;
+        launcherOpen = false;
+        sessionOpen = false;
+        nflyoutOpen = false;
+        controlOpen = false;
+        notifOpen = false;
+        calendarOpen = false;
+    }
     function toggleNotif(): void {
+        clipOpen = false;
         closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
@@ -80,6 +95,7 @@ Singleton {
         }
     }
     function toggleCalendar(): void {
+        clipOpen = false;
         closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;
@@ -89,6 +105,7 @@ Singleton {
         calendarOpen = !calendarOpen;
     }
     function closeAll(): void {
+        clipOpen = false;
         closeTrayMenu();
         launcherOpen = false;
         sessionOpen = false;

@@ -13,9 +13,9 @@ Rectangle {
     implicitWidth: diameter
     implicitHeight: diameter
     radius: diameter / 2
-    color: Theme.brandBg
+    color: Theme.active
     border.width: 2
-    border.color: hoverArea.containsMouse ? Theme.brandBg : Theme.stroke1
+    border.color: hoverArea.containsMouse ? Theme.active : Theme.stroke1
     Behavior on border.width {
         NumberAnimation {
             duration: Tokens.anim.faster
@@ -51,7 +51,7 @@ Rectangle {
         text: root.fallback
         kind: "title"
         semibold: true
-        color: "#ffffff"
+        color: Theme.activeFg
     }
     MouseArea {
         id: hoverArea

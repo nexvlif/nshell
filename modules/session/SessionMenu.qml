@@ -43,16 +43,16 @@ Scope {
 
             NRect {
                 anchors.fill: parent
-                corner: Tokens.rounding.medium
+                corner: Tokens.rounding.popover
                 fill: "bg1"
-                stroke: "subtle"
+                stroke: "none"
                 shadow: 16
 
                 ColumnLayout {
                     id: menuCol
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 4
+                    anchors.margins: 20
+                    spacing: 8
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -81,7 +81,7 @@ Scope {
                     NButton {
                         Layout.fillWidth: true
                         variant: "subtle"
-                        icon: "lock_closed"
+                        icon: "lock"
                         text: "Lock"
                         onClicked: {
                             Ui.closeAll();
@@ -91,7 +91,7 @@ Scope {
                     NButton {
                         Layout.fillWidth: true
                         variant: "subtle"
-                        icon: "sleep"
+                        icon: "bedtime"
                         text: "Sleep"
                         onClicked: {
                             Ui.closeAll();
@@ -101,7 +101,7 @@ Scope {
                     NButton {
                         Layout.fillWidth: true
                         variant: "subtle"
-                        icon: "door_arrow_right"
+                        icon: "logout"
                         text: "Log out"
                         onClicked: {
                             Ui.closeAll();
@@ -111,7 +111,7 @@ Scope {
                     NButton {
                         Layout.fillWidth: true
                         variant: "subtle"
-                        icon: "arrow_sync"
+                        icon: "restart_alt"
                         text: "Restart"
                         onClicked: {
                             Ui.closeAll();
@@ -121,7 +121,7 @@ Scope {
                     NButton {
                         Layout.fillWidth: true
                         variant: "subtle"
-                        icon: "power"
+                        icon: "power_settings_new"
                         text: "Shut down"
                         onClicked: {
                             Ui.closeAll();

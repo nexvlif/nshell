@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.ndesign
 
+// OneUI 9 mono button: primary filled active, secondary tonal, subtle text, outline stroked.
 Rectangle {
     id: root
     property string text: ""
@@ -14,19 +15,24 @@ Rectangle {
     readonly property string _v: primary ? "primary" : variant
     readonly property bool _secondary: _v === "secondary" || _v === "outline"
 
-    implicitHeight: 32
+    implicitHeight: 40
     implicitWidth: Math.max(96, row.implicitWidth + 24)
-    radius: Tokens.rounding.medium
+    radius: Tokens.rounding.pill
     opacity: disabled ? 1 : 1
     color: {
         if (disabled)
-            return _v === "primary" ? Theme.bgDisabled : Theme.bgDisabled;
+            return Theme.bgDisabled;
         if (_v === "primary") {
             if (hoverArea.pressed)
-                return Theme.brandBgPressed;
-            return hoverArea.containsMouse ? Theme.brandBgHover : Theme.brandBg;
+                return Theme.activePressed;
+            return hoverArea.containsMouse ? Theme.activeHover : Theme.active;
         }
-        if (_secondary) {
+        if (_v === "secondary") {
+            if (hoverArea.pressed)
+                return Theme.pressed(Theme.primaryContainer, 0.12);
+            return hoverArea.containsMouse ? Theme.hover(Theme.primaryContainer, 0.08) : Theme.primaryContainer;
+        }
+        if (_v === "outline") {
             if (hoverArea.pressed)
                 return Theme.bg1Pressed;
             return hoverArea.containsMouse ? Theme.bg1Hover : Theme.bg1;
@@ -35,7 +41,7 @@ Rectangle {
             return Theme.subtlePressed;
         return hoverArea.containsMouse ? Theme.subtleHover : "transparent";
     }
-    border.width: (_secondary && !disabled) ? 1 : 0
+    border.width: (_v === "outline" && !disabled) ? 1 : 0
     border.color: Theme.stroke1
     Behavior on color {
         ColorAnimation {
@@ -57,9 +63,9 @@ Rectangle {
                 if (root.disabled)
                     return Theme.fgDisabled;
                 if (root._v === "primary")
-                    return "#ffffff";
+                    return Theme.activeFg;
                 if (hoverArea.containsMouse || hoverArea.pressed)
-                    return root._secondary ? Theme.fg1 : Theme.brandIconHover;
+                    return Theme.fg1;
                 return root._secondary ? Theme.fg1 : Theme.fg2;
             }
         }
@@ -72,7 +78,9 @@ Rectangle {
                 if (root.disabled)
                     return Theme.fgDisabled;
                 if (root._v === "primary")
-                    return "#ffffff";
+                    return Theme.activeFg;
+                if (root._v === "secondary")
+                    return Theme.primaryContainerFg;
                 return root._secondary ? Theme.fg1 : Theme.fg2;
             }
         }

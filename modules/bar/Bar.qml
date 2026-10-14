@@ -230,11 +230,11 @@ Scope {
                                     implicitWidth: 32
                                     implicitHeight: 32
                                     source: Mpris.artUrl
-                                    imgRadius: Tokens.rounding.small
+                                    imgRadius: Tokens.rounding.pill
                                     NIcon {
                                         anchors.centerIn: parent
                                         visible: !barArt.imgReady
-                                        name: "music_note_1"
+                                        name: "music_note"
                                         iconSize: 16
                                         color: Theme.fg3
                                     }
@@ -318,7 +318,7 @@ Scope {
                             implicitHeight: 20
                             NIcon {
                                 anchors.centerIn: parent
-                                name: Audio.muted ? "speaker_mute" : "speaker_2"
+                                name: Audio.muted ? "volume_off" : "volume_up"
                                 iconSize: 18
                                 color: Theme.fg2
                             }
@@ -331,22 +331,16 @@ Scope {
                         Item {
                             visible: Config.options.bar.showBattery && Battery.ready
                             implicitWidth: battRow.implicitWidth
-                            implicitHeight: 20
+                            implicitHeight: 22
                             RowLayout {
                                 id: battRow
                                 anchors.centerIn: parent
                                 spacing: 2
-                                NIcon {
-                                    name: Battery.icon
-                                    iconSize: 18
-                                    color: Battery.stateColor !== "" ? Battery.stateColor : Theme.fg2
-                                }
-                                NIcon {
-                                    visible: Battery.charging && !Battery.critical
-                                    name: "flash"
-                                    filled: true
-                                    iconSize: 11
-                                    color: Theme.brandFg1
+                                NBattery {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    percent: Battery.percent
+                                    charging: Battery.charging
+                                    critical: Battery.critical
                                 }
                             }
                             MouseArea {
@@ -360,7 +354,7 @@ Scope {
                             implicitHeight: 32
                             NIconButton {
                                 anchors.fill: parent
-                                name: Notifs.dnd ? "weather_moon" : "alert"
+                                name: Notifs.dnd ? "notifications_off" : "notifications"
                                 restColor: Notifs.dnd ? Theme.brandBg : (Ui.notifOpen ? Theme.brandFg1 : Theme.fg2)
                                 onClicked: Ui.toggleNotif()
                             }
@@ -373,12 +367,12 @@ Scope {
                                 implicitWidth: Math.max(16, badgeText.implicitWidth + 8)
                                 implicitHeight: 16
                                 radius: 8
-                                color: "#d13438"
+                                color: Theme.error
                                 NText {
                                     id: badgeText
                                     anchors.centerIn: parent
                                     kind: "caption"
-                                    color: "#ffffff"
+                                    color: Theme.light ? "#ffffff" : "#1d1b20"
                                     text: Notifs.unread > 99 ? "99+" : Notifs.unread
                                 }
                             }
@@ -414,10 +408,10 @@ Scope {
                             id: searchPill
                             visible: Config.options.bar.showSearch
                             implicitWidth: Config.options.bar.searchWidth
-                            implicitHeight: 36
+                            implicitHeight: 40
                             radius: Tokens.rounding.pill
-                            color: Theme.bg3
-                            border.width: Ui.launcherOpen ? 2 : 1
+                            color: Theme.surfaceContainerHigh
+                            border.width: 0
                             border.color: Ui.launcherOpen ? Theme.brandBg : Theme.stroke2
                             transformOrigin: Item.Center
                             Behavior on border.color {
@@ -489,17 +483,25 @@ Scope {
                                 delegate: Rectangle {
                                     required property var modelData
                                     visible: modelData.monitor?.name === win.screen.name
-                                    implicitWidth: 40
-                                    implicitHeight: 40
-                                    radius: Tokens.rounding.large
+                                    // end4 M3: active pill stretches, inactive is a dot/short pill.
+                                    implicitWidth: modelData.focused ? 48 : 32
+                                    implicitHeight: 32
+                                    radius: Tokens.rounding.pill
                                     color: {
                                         if (wsHover.pressed)
-                                            return Theme.subtlePressed;
+                                            return Theme.pressed(Theme.primary, 0.15);
                                         if (modelData.focused)
-                                            return Theme.light ? Theme.brand160 : Qt.rgba(0.28, 0.62, 0.96, 0.16);
+                                            return Theme.primary;
                                         if (wsHover.containsMouse)
-                                            return Theme.subtleHover;
-                                        return "transparent";
+                                            return Theme.surfaceContainerHigh;
+                                        return Theme.surfaceContainerHigh;
+                                    }
+                                    opacity: modelData.focused ? 1 : 0.72
+                                    Behavior on implicitWidth {
+                                        NumberAnimation {
+                                            duration: Tokens.anim.fast
+                                            easing.type: Easing.OutCubic
+                                        }
                                     }
                                     Behavior on color {
                                         ColorAnimation {
@@ -511,18 +513,18 @@ Scope {
                                         text: modelData.id
                                         kind: "small"
                                         semibold: modelData.focused
-                                        color: modelData.focused ? Theme.brandFg1 : Theme.fg2
+                                        color: modelData.focused ? Theme.primaryFg : Theme.fg2
                                     }
                                     Rectangle {
                                         visible: modelData.urgent && !modelData.focused
                                         anchors.top: parent.top
-                                        anchors.topMargin: 7
+                                        anchors.topMargin: 6
                                         anchors.right: parent.right
-                                        anchors.rightMargin: 7
+                                        anchors.rightMargin: 6
                                         width: 6
                                         height: 6
                                         radius: 3
-                                        color: "#d13438"
+                                        color: Theme.error
                                     }
                                     MouseArea {
                                         id: wsHover
@@ -570,6 +572,7 @@ Scope {
                     }
 
                     Rectangle {
+                        visible: false
                         Layout.fillWidth: true
                         Layout.leftMargin: 6
                         Layout.rightMargin: 6
@@ -585,17 +588,24 @@ Scope {
                             delegate: Rectangle {
                                 required property var modelData
                                 visible: modelData.monitor?.name === win.screen.name
-                                implicitWidth: 40
-                                implicitHeight: 40
-                                radius: Tokens.rounding.large
+                                implicitWidth: 32
+                                implicitHeight: modelData.focused ? 48 : 32
+                                radius: Tokens.rounding.pill
                                 color: {
                                     if (vwsHover.pressed)
-                                        return Theme.subtlePressed;
+                                        return Theme.pressed(Theme.primary, 0.15);
                                     if (modelData.focused)
-                                        return Theme.light ? Theme.brand160 : Qt.rgba(0.28, 0.62, 0.96, 0.16);
+                                        return Theme.primary;
                                     if (vwsHover.containsMouse)
-                                        return Theme.subtleHover;
-                                    return "transparent";
+                                        return Theme.surfaceContainerHigh;
+                                    return Theme.surfaceContainerHigh;
+                                }
+                                opacity: modelData.focused ? 1 : 0.72
+                                Behavior on implicitHeight {
+                                    NumberAnimation {
+                                        duration: Tokens.anim.fast
+                                        easing.type: Easing.OutCubic
+                                    }
                                 }
                                 Behavior on color {
                                     ColorAnimation {
@@ -607,7 +617,7 @@ Scope {
                                     text: modelData.id
                                     kind: "small"
                                     semibold: modelData.focused
-                                    color: modelData.focused ? Theme.brandFg1 : Theme.fg2
+                                    color: modelData.focused ? Theme.primaryFg : Theme.fg2
                                 }
                                 MouseArea {
                                     id: vwsHover
@@ -621,6 +631,7 @@ Scope {
                     }
 
                     Rectangle {
+                        visible: false
                         Layout.fillWidth: true
                         Layout.leftMargin: 6
                         Layout.rightMargin: 6
@@ -680,7 +691,7 @@ Scope {
                             implicitHeight: 20
                             NIcon {
                                 anchors.centerIn: parent
-                                name: Audio.muted ? "speaker_mute" : "speaker_2"
+                                name: Audio.muted ? "volume_off" : "volume_up"
                                 iconSize: 18
                                 color: Theme.fg2
                             }
@@ -690,24 +701,18 @@ Scope {
                                 onClicked: Ui.toggleControl()
                             }
                         }
-                        NIcon {
+                        NBattery {
                             Layout.alignment: Qt.AlignHCenter
                             visible: Config.options.bar.showBattery && Battery.ready
-                            name: Battery.icon
-                            iconSize: 18
-                            color: Battery.stateColor !== "" ? Battery.stateColor : Theme.fg2
-                        }
-                        NIcon {
-                            Layout.alignment: Qt.AlignHCenter
-                            visible: Config.options.bar.showBattery && Battery.ready && Battery.charging && !Battery.critical
-                            name: "flash"
-                            filled: true
-                            iconSize: 11
-                            color: Theme.brandFg1
+                            vertical: true
+                            percent: Battery.percent
+                            charging: Battery.charging
+                            critical: Battery.critical
                         }
                     }
 
                     Rectangle {
+                        visible: false
                         Layout.fillWidth: true
                         Layout.leftMargin: 6
                         Layout.rightMargin: 6
@@ -788,16 +793,16 @@ Scope {
                 width: menuW
                 x: menuX
                 y: pos === "top" ? Ui.trayMenuY + 24 : Math.max(8, Ui.trayMenuY - 4 - height)
-                height: Math.min(menuFlick.contentHeight + 12, 480)
-                corner: Tokens.rounding.large
+                height: Math.min(menuFlick.contentHeight + 16, 480)
+                corner: Tokens.rounding.popover
                 fill: "bg1"
-                stroke: "subtle"
+                stroke: "none"
                 shadow: 16
 
                 Flickable {
                     id: menuFlick
                     anchors.fill: parent
-                    anchors.margins: 6
+                    anchors.margins: 8
                     clip: true
                     contentWidth: width
                     contentHeight: menuItems.implicitHeight

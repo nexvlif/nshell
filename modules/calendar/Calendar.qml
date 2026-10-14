@@ -30,6 +30,9 @@ Scope {
             }
 
             property string pos: Config.options.bar.position
+            readonly property var barM: Config.options.bar.margins[pos] ?? Config.options.bar.margins["bottom"]
+            readonly property int vClear: Config.options.bar.height + barM.top + barM.bottom + 12
+            readonly property int hClear: Config.options.bar.height + barM.left + barM.right + 12
             anchors {
                 top: true
                 bottom: true
@@ -57,15 +60,18 @@ Scope {
                 focus: true
                 Keys.onEscapePressed: Ui.closeAll()
                 width: 320
-                implicitHeight: calCol.implicitHeight + 32
+                implicitHeight: calCol.implicitHeight + 40
                 anchors.left: (pos === "right") ? undefined : parent.left
                 anchors.right: (pos === "right") ? parent.right : undefined
                 anchors.top: (pos === "top") ? parent.top : undefined
                 anchors.bottom: (pos !== "top") ? parent.bottom : undefined
-                anchors.margins: 12
-                corner: Tokens.rounding.xlarge
+                anchors.topMargin: pos === "top" ? win.vClear : 12
+                anchors.bottomMargin: pos === "bottom" ? win.vClear : 12
+                anchors.leftMargin: pos === "left" ? win.hClear : 12
+                anchors.rightMargin: pos === "right" ? win.hClear : 12
+                corner: Tokens.rounding.popover
                 fill: "bg1"
-                stroke: "subtle"
+                stroke: "none"
                 shadow: 16
 
                 ColumnLayout {
@@ -73,8 +79,8 @@ Scope {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.margins: 16
-                    spacing: 8
+                    anchors.margins: 20
+                    spacing: 12
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -97,8 +103,8 @@ Scope {
                     GridLayout {
                         Layout.fillWidth: true
                         columns: 7
-                        rowSpacing: 2
-                        columnSpacing: 2
+                        rowSpacing: 4
+                        columnSpacing: 4
                         Repeater {
                             model: root.days
                             delegate: NText {
@@ -126,8 +132,8 @@ Scope {
                             delegate: Rectangle {
                                 required property var modelData
                                 Layout.fillWidth: true
-                                implicitHeight: 34
-                                radius: Tokens.rounding.medium
+                                implicitHeight: 36
+                                radius: Tokens.rounding.pill
                                 color: {
                                     if (modelData === 0)
                                         return "transparent";
@@ -145,7 +151,7 @@ Scope {
                                     anchors.centerIn: parent
                                     kind: "small"
                                     semibold: parent.isToday
-                                    color: parent.isToday ? "#ffffff" : Theme.fg1
+                                    color: parent.isToday ? Theme.primaryFg : Theme.fg1
                                     text: modelData === 0 ? "" : modelData
                                 }
                                 MouseArea {

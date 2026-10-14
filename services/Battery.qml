@@ -14,10 +14,14 @@ Singleton {
     readonly property int level: Math.max(0, Math.min(10, Math.round(percent * 10)))
     readonly property string icon: {
         if (!ready)
-            return "battery_10";
+            return "battery_full";
+        if (charging)
+            return percent >= 0.95 ? "battery_charging_full" : percent >= 0.8 ? "battery_charging_80" : percent >= 0.4 ? "battery_charging_50" : "battery_charging_20";
         if (critical)
-            return "battery_warning";
-        return "battery_" + level;
+            return "battery_alert";
+        if (percent >= 0.95)
+            return "battery_full";
+        return "battery_" + Math.round(percent * 6) + "_bar";
     }
     readonly property string stateColor: {
         if (critical)

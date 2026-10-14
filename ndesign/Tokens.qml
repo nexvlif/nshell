@@ -3,19 +3,24 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
+// OneUI 9 design tokens. Single theme — no variants.
 Singleton {
     id: root
 
+    // Deprecated alias — always true. Kept so old QML referencing
+    // Tokens.material doesn't break. New code shouldn't use it.
+    readonly property bool material: true
+
     readonly property QtObject rounding: QtObject {
         readonly property int none: 0
-        readonly property int small: 2
-        readonly property int control: 4
-        readonly property int medium: 4
-        readonly property int large: 6
-        readonly property int card: 8
-        readonly property int xlarge: 8
-        readonly property int popover: 12
-        readonly property int xxlarge: 12
+        readonly property int small: 8
+        readonly property int control: 10
+        readonly property int medium: 12
+        readonly property int large: 20
+        readonly property int card: 20
+        readonly property int xlarge: 24
+        readonly property int popover: 28
+        readonly property int xxlarge: 32
         readonly property int pill: 999
     }
     readonly property QtObject spacing: QtObject {

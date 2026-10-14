@@ -57,42 +57,43 @@ Singleton {
 
             property JsonObject theme: JsonObject {
                 property string mode: "dark"
-                property string accent: "#0f6cbd"
+                // OneUI 9 mono: empty = no blue accent, active follows NBattery.
+                property string accent: ""
             }
             property JsonObject bar: JsonObject {
                 property string position: "bottom"
-                property int height: 56
+                property int height: 48
                 property string verticalMode: "adaptive" // adaptive | full | compact
                 property JsonObject margins: JsonObject {
                     property JsonObject top: JsonObject {
-                        property int top: 3
-                        property int bottom: 3
-                        property int left: 3
-                        property int right: 3
+                        property int top: 8
+                        property int bottom: 8
+                        property int left: 8
+                        property int right: 8
                     }
                     property JsonObject bottom: JsonObject {
-                        property int top: 3
-                        property int bottom: 3
-                        property int left: 3
-                        property int right: 3
+                        property int top: 8
+                        property int bottom: 8
+                        property int left: 8
+                        property int right: 8
                     }
                     property JsonObject left: JsonObject {
-                        property int top: 3
-                        property int bottom: 3
-                        property int left: 3
-                        property int right: 3
+                        property int top: 8
+                        property int bottom: 8
+                        property int left: 8
+                        property int right: 8
                     }
                     property JsonObject right: JsonObject {
-                        property int top: 3
-                        property int bottom: 3
-                        property int left: 3
-                        property int right: 3
+                        property int top: 8
+                        property int bottom: 8
+                        property int left: 8
+                        property int right: 8
                     }
                 }
-                property int pillPadding: 28
-                property int avatarSize: 36
-                property int searchWidth: 220
-                property int shadow: 0
+                property int pillPadding: 20
+                property int avatarSize: 32
+                property int searchWidth: 200
+                property int shadow: 12
                 property list<string> pinnedApps: []
                 property bool clock12h: true
                 property bool showDate: true

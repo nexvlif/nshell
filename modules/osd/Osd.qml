@@ -50,30 +50,17 @@ Scope {
                     spacing: 14
                     NIcon {
                         Layout.alignment: Qt.AlignVCenter
-                        name: Ui.osdKind === "brightness" ? "weather_sunny" : (Audio.muted ? "speaker_mute" : "speaker_2")
+                        name: Ui.osdKind === "brightness" ? "sunny" : (Audio.muted ? "volume_off" : "volume_up")
                         filled: true
                         iconSize: 20
                         color: Theme.fg1
                     }
-                    Rectangle {
+                    NSlider {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
-                        implicitHeight: 4
-                        radius: 2
-                        color: Theme.stroke2
-                        Rectangle {
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width * (Ui.osdKind === "brightness" ? Brightness.value : Audio.volume)
-                            height: parent.height
-                            radius: 2
-                            color: Theme.brandBg
-                            Behavior on width {
-                                NumberAnimation {
-                                    duration: Tokens.anim.faster
-                                }
-                            }
-                        }
+                        trackSize: 30
+                        interactive: false
+                        value: Ui.osdKind === "brightness" ? Brightness.value : Audio.volume
                     }
                 }
             }

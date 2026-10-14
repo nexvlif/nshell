@@ -16,20 +16,20 @@ Singleton {
 
     readonly property string icon: {
         if (code < 0)
-            return "weather_cloudy";
+            return "cloudy";
         if (code === 0)
-            return isDay ? "weather_sunny" : "weather_moon";
+            return isDay ? "sunny" : "clear_night";
         if (code <= 3)
-            return isDay ? "weather_partly_cloudy_day" : "weather_partly_cloudy_night";
+            return isDay ? "partly_cloudy_day" : "partly_cloudy_night";
         if (code === 45 || code === 48)
-            return "weather_fog";
+            return "foggy";
         if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82))
-            return "weather_rain";
+            return "rainy";
         if ((code >= 71 && code <= 77) || code === 85 || code === 86)
-            return "weather_snow";
+            return "weather_snowy";
         if (code >= 95)
-            return "weather_thunderstorm";
-        return "weather_cloudy";
+            return "thunderstorm";
+        return "cloudy";
     }
     readonly property bool isDay: {
         const h = Time.date.getHours();

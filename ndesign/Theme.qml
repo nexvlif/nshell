@@ -5,10 +5,19 @@ import QtQuick
 import Quickshell
 import qs.services
 
+// OneUI 9 theme — full mono. No blue accent anywhere.
+// Active fill mirrors NBattery: white fill on dark track in dark mode,
+// near-black fill on light track in light mode.
 Singleton {
     id: root
     readonly property bool light: Config.options.theme.mode === "light"
 
+    // Deprecated alias — always true. Kept so old QML referencing
+    // true doesn't break. New code shouldn't use it.
+    readonly property bool material: true
+
+    // Deprecated — OneUI 9 mono keeps no blue ramp. Values retained only
+    // so old QML referencing brandXX doesn't break. Do not use.
     readonly property color brand30: "#0a2e4a"
     readonly property color brand40: "#0c3b5e"
     readonly property color brand50: "#0e4775"
@@ -26,47 +35,55 @@ Singleton {
     readonly property color fg3: light ? "#616161" : "#adadad"
     readonly property color fgDisabled: light ? "#bdbdbd" : "#767676"
 
-    readonly property color bg1: light ? "#ffffff" : "#292929"
-    readonly property color bg1Hover: light ? "#f5f5f5" : "#3d3d3d"
+    // OneUI 9 mono: neutral surfaces, no accent tint.
+    readonly property color bg1: light ? "#ffffff" : "#131313"
+    readonly property color bg1Hover: light ? "#f0f0f0" : "#2b2b2b"
     readonly property color bg1Pressed: light ? "#e0e0e0" : "#1f1f1f"
-    readonly property color bg2: light ? "#fafafa" : "#1f1f1f"
-    readonly property color bg3: light ? "#f5f5f5" : "#141414"
+    readonly property color bg2: light ? "#f1f1f1" : "#1e1e1e"
+    readonly property color bg3: light ? "#e9e9e9" : "#0d0d0d"
     readonly property color bgDisabled: light ? "#f0f0f0" : "#2e2e2e"
 
-    readonly property color subtleHover: light ? "#f5f5f5" : "#383838"
-    readonly property color subtlePressed: light ? "#e0e0e0" : "#2e2e2e"
-    readonly property color subtleSelected: light ? "#ebebeb" : "#333333"
+    readonly property color subtleHover: light ? "#e8e8e8" : "#2b2b2b"
+    readonly property color subtlePressed: light ? "#e0e0e0" : "#333333"
+    readonly property color subtleSelected: light ? "#dedede" : "#333333"
 
-    readonly property color cardBg: light ? "#fafafa" : "#333333"
-    readonly property color cardHover: light ? "#ffffff" : "#3d3d3d"
-    readonly property color cardPressed: light ? "#f5f5f5" : "#2e2e2e"
+    readonly property color cardBg: light ? "#f1f1f1" : "#1e1e1e"
+    readonly property color cardHover: light ? "#e8e8e8" : "#2b2b2b"
+    readonly property color cardPressed: light ? "#e0e0e0" : "#333333"
 
-    readonly property bool customAccent: (Config.options.theme.accent || "") !== ""
-    readonly property color accentBase: Config.options.theme.accent || brand80
-    readonly property color brandBg: light ? accentBase : (customAccent ? accentBase : brand70)
-    readonly property color brandBgHover: light ? (customAccent ? Qt.lighter(accentBase, 1.12) : brand70) : (customAccent ? Qt.lighter(accentBase, 1.12) : brand80)
-    readonly property color brandBgPressed: light ? (customAccent ? Qt.darker(accentBase, 1.15) : brand40) : (customAccent ? Qt.darker(accentBase, 1.15) : brand60)
-    readonly property color brandBgSelected: light ? brand60 : brand80
-    readonly property color brandFg1: light ? brand80 : brand100
-    readonly property color brandFg2: light ? brand70 : brand110
-    readonly property color brandFgOnLight: light ? brand80 : brand100
-    readonly property color brandIconHover: light ? brand80 : brand100
-    readonly property color brandIconPressed: light ? brand70 : brand90
+    // Mono active — same language as NBattery (fg1 fill on dark track).
+    readonly property color active: light ? "#242424" : "#ffffff"
+    readonly property color activeFg: light ? "#ffffff" : "#1a1a1a"
+    readonly property color activeHover: light ? "#3a3a3a" : "#e0e0e0"
+    readonly property color activePressed: light ? "#101010" : "#c4c4c4"
 
-    readonly property color stroke1: light ? "#d1d1d1" : "#666666"
-    readonly property color stroke2: light ? "#e0e0e0" : "#525252"
+    // Deprecated: accent config is ignored in mono mode. Kept for compat.
+    readonly property bool customAccent: false
+    readonly property color accentBase: active
+    readonly property color brandBg: active
+    readonly property color brandBgHover: activeHover
+    readonly property color brandBgPressed: activePressed
+    readonly property color brandBgSelected: active
+    readonly property color brandFg1: fg1
+    readonly property color brandFg2: fg1
+    readonly property color brandFgOnLight: fg1
+    readonly property color brandIconHover: fg1
+    readonly property color brandIconPressed: fg1
+
+    readonly property color stroke1: light ? "#cacaca" : "#3a3a3a"
+    readonly property color stroke2: light ? "#e5e5e5" : "#2b2b2b"
     readonly property color stroke3: light ? "#f0f0f0" : "#3d3d3d"
     readonly property color strokeAccessible: light ? "#616161" : "#adadad"
-    readonly property color brandStroke1: light ? brand80 : brand100
+    readonly property color brandStroke1: fg1
 
     readonly property color shadowAmbient: light ? Qt.rgba(0, 0, 0, 0.12) : Qt.rgba(0, 0, 0, 0.24)
     readonly property color shadowKey: light ? Qt.rgba(0, 0, 0, 0.14) : Qt.rgba(0, 0, 0, 0.28)
 
-    readonly property string fontFamily: "Segoe UI, Segoe UI Variable Text, Inter, Cantarell, sans-serif"
-    readonly property string fontMono: "Consolas, Courier New, monospace"
+    readonly property string fontFamily: "Roboto, Inter, Cantarell, sans-serif"
+    readonly property string fontMono: "Roboto Mono, Consolas, monospace"
 
-    readonly property color accent: brandBg
-    readonly property color accentFg: "#ffffff"
+    readonly property color accent: active
+    readonly property color accentFg: activeFg
     readonly property color bg: bg1
     readonly property color bgSolid: bg1
     readonly property color surface: bg2
@@ -89,6 +106,25 @@ Singleton {
     readonly property color overlay: Qt.rgba(0, 0, 0, 0.4)
     readonly property color textPrimary: fg1
     readonly property color textSecondary: fg2
+
+    // Tonal roles — all neutral in mono mode (no purple/blue containers).
+    // Note: QML reserves the `on*` prefix for signal handlers, so M3 `onX`
+    // roles are named `xFg` instead.
+    readonly property color primary: active
+    readonly property color primaryFg: activeFg
+    readonly property color primaryContainer: light ? "#e8e8e8" : "#2b2b2b"
+    readonly property color primaryContainerFg: fg1
+    readonly property color surfaceContainer: bg2
+    readonly property color surfaceContainerHigh: subtleHover
+    readonly property color surfaceVariantFg: fg2
+    // Secondary/tertiary containers — slider track, chips, icon wells.
+    readonly property color secondaryContainer: light ? "#e8e8e8" : "#2b2b2b"
+    readonly property color secondaryContainerFg: fg2
+    readonly property color tertiaryContainer: light ? "#e8e8e8" : "#2b2b2b"
+    readonly property color tertiaryContainerFg: fg1
+    // Error roles (badges / destructive hints).
+    readonly property color error: light ? "#ba1a1a" : "#ffb4ab"
+    readonly property color errorContainer: light ? "#ffdad6" : "#93000a"
 
     function hover(c, amt = 0.08): color {
         return Qt.lighter(c, 1 + amt);

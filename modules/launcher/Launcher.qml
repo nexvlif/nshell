@@ -70,27 +70,27 @@ Scope {
                 const cmds = [{
                     name: "Lock",
                     sub: "Lock session",
-                    icon: "lock_closed",
+                    icon: "lock",
                     run: Session.lock
                 }, {
                     name: "Sleep",
                     sub: "Suspend system",
-                    icon: "sleep",
+                    icon: "bedtime",
                     run: Session.suspend
                 }, {
                     name: "Log out",
                     sub: "End session",
-                    icon: "door_arrow_right",
+                    icon: "logout",
                     run: Session.logout
                 }, {
                     name: "Restart",
                     sub: "Reboot system",
-                    icon: "arrow_sync",
+                    icon: "restart_alt",
                     run: Session.reboot
                 }, {
                     name: "Shut down",
                     sub: "Power off",
-                    icon: "power",
+                    icon: "power_settings_new",
                     run: Session.poweroff
                 }].filter(c => !q || (c.name + " " + c.sub).toLowerCase().includes(q));
                 if (cmds.length > 0) {
@@ -169,9 +169,9 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
                 anchors.topMargin: Math.round(parent.height * 0.18)
-                corner: Tokens.rounding.xlarge
+                corner: Tokens.rounding.popover
                 fill: "bg1"
-                stroke: "subtle"
+                stroke: "none"
                 shadow: 28
                 scale: win.visible ? 1 : 0.96
                 opacity: win.visible ? 1 : 0
@@ -189,13 +189,13 @@ Scope {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: Tokens.spacing.m
-                    spacing: Tokens.spacing.s
+                    anchors.margins: Tokens.spacing.l
+                    spacing: Tokens.spacing.m
 
                     NSearchBox {
                         id: box
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 40
+                        Layout.preferredHeight: 48
                         placeholder: "Type a command or search"
                         field.onTextChanged: {
                             win.query = field.text;
@@ -214,23 +214,23 @@ Scope {
                         Layout.fillHeight: true
                         clip: true
                         model: win.results
-                        spacing: 2
+                        spacing: 4
                         highlightMoveDuration: Tokens.anim.faster
 
                         delegate: Item {
                             required property var modelData
                             required property int index
                             width: list.width
-                            implicitHeight: modelData.kind === "header" ? 28 : 52
+                            implicitHeight: modelData.kind === "header" ? 28 : 56
 
                             Rectangle {
                                 anchors.fill: parent
-                                radius: Tokens.rounding.medium
+                                radius: Tokens.rounding.large
                                 color: {
                                     if (modelData.kind === "header")
                                         return "transparent";
                                     if (list.currentIndex === index)
-                                        return Theme.subtleSelected;
+                                        return Theme.primaryContainer;
                                     return hoverArea.containsMouse ? Theme.subtleHover : "transparent";
                                 }
                                 NText {
@@ -307,6 +307,7 @@ Scope {
                     }
 
                     Rectangle {
+                        visible: false
                         Layout.fillWidth: true
                         implicitHeight: 1
                         color: Theme.stroke2

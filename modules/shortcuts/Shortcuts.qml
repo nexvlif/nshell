@@ -29,6 +29,27 @@ Scope {
 
     GlobalShortcut {
         appid: "nshell"
+        name: "clipboardToggle"
+        description: "Toggle clipboard history"
+        property bool armed: false
+        onPressed: armed = true
+        onReleased: {
+            if (armed) {
+                armed = false;
+                Ui.toggleClipboard();
+            }
+        }
+    }
+
+    GlobalShortcut {
+        appid: "nshell"
+        name: "controlToggle"
+        description: "Toggle control center"
+        onPressed: Ui.toggleControl()
+    }
+
+    GlobalShortcut {
+        appid: "nshell"
         name: "volumeUp"
         description: "Volume up + OSD"
         onPressed: Audio.increment(0.05)

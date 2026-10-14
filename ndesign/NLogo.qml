@@ -8,7 +8,7 @@ Rectangle {
     implicitWidth: 32
     implicitHeight: 32
     radius: Tokens.rounding.large
-    color: hoverArea.pressed ? Theme.brandBgPressed : hoverArea.containsMouse ? Theme.brandBgHover : Theme.brandBg
+    color: hoverArea.pressed ? Theme.activePressed : hoverArea.containsMouse ? Theme.activeHover : Theme.active
     Behavior on color {
         ColorAnimation {
             duration: Tokens.anim.faster
@@ -43,7 +43,7 @@ Rectangle {
         text: "n"
         kind: "title"
         semibold: true
-        color: "#ffffff"
+        color: Theme.activeFg
     }
     MouseArea {
         id: hoverArea

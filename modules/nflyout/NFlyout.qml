@@ -22,6 +22,9 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
             property string pos: Config.options.bar.position
+            readonly property var barM: Config.options.bar.margins[pos] ?? Config.options.bar.margins["bottom"]
+            readonly property int vClear: Config.options.bar.height + barM.top + barM.bottom + 12
+            readonly property int hClear: Config.options.bar.height + barM.left + barM.right + 12
             anchors {
                 top: true
                 bottom: true
@@ -52,7 +55,10 @@ Scope {
                 anchors.left: (pos === "left") ? parent.left : undefined
                 anchors.top: (pos === "top") ? parent.top : undefined
                 anchors.bottom: (pos !== "top") ? parent.bottom : undefined
-                anchors.margins: 12
+                anchors.topMargin: pos === "top" ? win.vClear : 12
+                anchors.bottomMargin: pos === "bottom" ? win.vClear : 12
+                anchors.leftMargin: pos === "left" ? win.hClear : 12
+                anchors.rightMargin: pos === "right" ? win.hClear : 12
                 corner: Tokens.rounding.xlarge
                 fill: "bg1"
                 stroke: "subtle"
@@ -82,7 +88,7 @@ Scope {
                                 NIcon {
                                     anchors.centerIn: parent
                                     visible: !flyArt.imgReady
-                                    name: "music_note_1"
+                                    name: "music_note"
                                     iconSize: 28
                                     color: Theme.fg3
                                 }
@@ -122,6 +128,8 @@ Scope {
                             Layout.alignment: Qt.AlignVCenter
                             value: Mpris.length > 0 ? Mpris.position / Mpris.length : 0
                             interactive: Mpris.canSeek
+                            wavy: true
+                            animateWave: Mpris.playing
                             onMoved: v => Mpris.seekTo(v)
                         }
                         NText {
@@ -138,12 +146,12 @@ Scope {
                             Layout.fillWidth: true
                         }
                         NIconButton {
-                            name: Mpris.shuffle ? "arrow_shuffle" : "arrow_shuffle_off"
+                            name: "shuffle"
                             restColor: Mpris.shuffle ? Theme.brandFg1 : Theme.fg2
                             onClicked: Mpris.toggleShuffle()
                         }
                         NIconButton {
-                            name: "chevron_left"
+                            name: "skip_previous"
                             onClicked: Mpris.previous()
                         }
                         Rectangle {
@@ -158,7 +166,7 @@ Scope {
                             }
                             NIcon {
                                 anchors.centerIn: parent
-                                name: Mpris.playing ? "pause" : "play"
+                                name: Mpris.playing ? "pause" : "play_arrow"
                                 filled: true
                                 iconSize: 22
                                 color: "#ffffff"
@@ -172,11 +180,11 @@ Scope {
                             }
                         }
                         NIconButton {
-                            name: "chevron_right"
+                            name: "skip_next"
                             onClicked: Mpris.next()
                         }
                         NIconButton {
-                            name: Mpris.loop === 1 ? "arrow_repeat_1" : (Mpris.loop === 2 ? "arrow_repeat_all" : "arrow_repeat_all_off")
+                            name: Mpris.loop === 1 ? "repeat_one" : "repeat"
                             restColor: Mpris.loop === 0 ? Theme.fg2 : Theme.brandFg1
                             onClicked: Mpris.cycleLoop()
                         }
