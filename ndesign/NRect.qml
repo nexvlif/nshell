@@ -23,7 +23,7 @@ Rectangle {
         return Theme.bg1;
     }
     radius: corner
-    // OneUI: panels & pills are borderless — only explicit strong/brand strokes draw.
+
     border.width: {
         if (stroke === "none" || stroke === "subtle")
             return 0;
@@ -41,7 +41,7 @@ Rectangle {
     layer.effect: MultiEffect {
         shadowEnabled: true
         shadowColor: Theme.shadowKey
-        // end4 StyledRectangularShadow: soft blur ~9px, 1px y-offset, ~30% black.
+
         shadowBlur: Math.min(32, Math.max(8, root.shadow))
         shadowVerticalOffset: 1
         shadowOpacity: 0.32

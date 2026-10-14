@@ -57,13 +57,13 @@ Singleton {
 
             property JsonObject theme: JsonObject {
                 property string mode: "dark"
-                // OneUI 9 mono: empty = no blue accent, active follows NBattery.
+
                 property string accent: ""
             }
             property JsonObject bar: JsonObject {
                 property string position: "bottom"
                 property int height: 48
-                property string verticalMode: "adaptive" // adaptive | full | compact
+                property string verticalMode: "adaptive"
                 property JsonObject margins: JsonObject {
                     property JsonObject top: JsonObject {
                         property int top: 8
@@ -98,6 +98,7 @@ Singleton {
                 property bool clock12h: true
                 property bool showDate: true
                 property bool showSearch: true
+                property bool showTools: true
                 property bool showWeather: true
                 property bool showResources: false
                 property bool showActiveWindow: true

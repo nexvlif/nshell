@@ -6,6 +6,7 @@ Rectangle {
     property string name: "search"
     property int glyphSize: 20
     property color restColor: Theme.fg2
+    property bool filled: false
     signal clicked
 
     implicitWidth: 40
@@ -21,7 +22,7 @@ Rectangle {
     NIcon {
         anchors.centerIn: parent
         name: root.name
-        filled: hoverArea.containsMouse || hoverArea.pressed
+        filled: root.filled || hoverArea.containsMouse || hoverArea.pressed
         iconSize: root.glyphSize
         color: hoverArea.pressed ? Theme.fg1 : hoverArea.containsMouse ? Theme.fg1 : root.restColor
         Behavior on color {

@@ -1,7 +1,6 @@
 import QtQuick
 import qs.ndesign
 
-// OneUI 9 mono switch (52x32, active track like NBattery fill, thumb inverse).
 Rectangle {
     id: root
     property bool checked: false

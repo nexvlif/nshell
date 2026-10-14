@@ -1,10 +1,6 @@
 import QtQuick
 import qs.ndesign
 
-// OneUI slider, ported from end4-pC StyledSlider.
-// Sizes mirror end4 Configuration: Wavy=4, XS=12, S=18, M=30, L=42, XL=72.
-// API: value 0..1, interactive, moved(real v), wavy, animateWave,
-//      trackSize (default 18 = S; volume/OSD pakai 30 = M; settings pakai 12 = XS).
 Rectangle {
     id: root
     property real value: 0
@@ -14,7 +10,6 @@ Rectangle {
     property real trackSize: 18
     signal moved(real v)
 
-    // Effective geometry (end4: handleHeight = max(33, track+9), Wavy = 24).
     readonly property real effTrack: root.wavy ? 4 : root.trackSize
     readonly property real trackR: {
         if (effTrack >= 72)
@@ -36,7 +31,6 @@ Rectangle {
     }
     readonly property real gap: 4
 
-    // OneUI 9 mono: highlight = active (like NBattery fill), track = neutral.
     readonly property color hiColor: drag.active ? Theme.activePressed : Theme.active
     readonly property color trackColor: Theme.surfaceContainerHigh
 
@@ -46,7 +40,6 @@ Rectangle {
 
     readonly property real ratio: Math.max(0, Math.min(1, drag.active ? drag.v : root.value))
 
-    // Smooth glide like end4 (SmoothedAnimation on value).
     Behavior on value {
         SmoothedAnimation {
             velocity: 3.5
@@ -61,7 +54,6 @@ Rectangle {
         radius: root.trackR
         color: root.trackColor
 
-        // Straight active fill (hidden in wavy mode).
         Rectangle {
             visible: !root.wavy
             anchors.left: parent.left
@@ -74,7 +66,7 @@ Rectangle {
             bottomRightRadius: 2
             color: root.hiColor
         }
-        // Wavy active fill (end4-pC WavyLine: lw 4, amp 0.5, freq 6 over full length).
+
         Canvas {
             id: wave
             visible: root.wavy
@@ -116,7 +108,7 @@ Rectangle {
                 loops: Animation.Infinite
             }
         }
-        // M3 stop indicator dot at the track end.
+
         Rectangle {
             visible: !root.wavy && root.ratio < 0.995
             anchors.verticalCenter: parent.verticalCenter
@@ -127,7 +119,7 @@ Rectangle {
             color: Theme.surfaceVariantFg
             opacity: 0.9
         }
-        // Highlight-side dot (visible once fill passes the end dot zone).
+
         Rectangle {
             visible: !root.wavy && root.ratio > 0.995
             anchors.verticalCenter: parent.verticalCenter
@@ -139,7 +131,7 @@ Rectangle {
             opacity: 0.95
         }
     }
-    // M3 handle: thin tall pill straddling the fill edge.
+
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         x: Math.min(parent.width - width, Math.max(0, parent.width * root.ratio - width / 2))
@@ -155,7 +147,7 @@ Rectangle {
             }
         }
     }
-    // Pressed % tooltip (Pixel style bubble).
+
     Rectangle {
         visible: drag.active && root.interactive
         anchors.bottom: parent.top

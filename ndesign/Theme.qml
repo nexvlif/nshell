@@ -5,19 +5,12 @@ import QtQuick
 import Quickshell
 import qs.services
 
-// OneUI 9 theme — full mono. No blue accent anywhere.
-// Active fill mirrors NBattery: white fill on dark track in dark mode,
-// near-black fill on light track in light mode.
 Singleton {
     id: root
     readonly property bool light: Config.options.theme.mode === "light"
 
-    // Deprecated alias — always true. Kept so old QML referencing
-    // true doesn't break. New code shouldn't use it.
     readonly property bool material: true
 
-    // Deprecated — OneUI 9 mono keeps no blue ramp. Values retained only
-    // so old QML referencing brandXX doesn't break. Do not use.
     readonly property color brand30: "#0a2e4a"
     readonly property color brand40: "#0c3b5e"
     readonly property color brand50: "#0e4775"
@@ -35,7 +28,6 @@ Singleton {
     readonly property color fg3: light ? "#616161" : "#adadad"
     readonly property color fgDisabled: light ? "#bdbdbd" : "#767676"
 
-    // OneUI 9 mono: neutral surfaces, no accent tint.
     readonly property color bg1: light ? "#ffffff" : "#131313"
     readonly property color bg1Hover: light ? "#f0f0f0" : "#2b2b2b"
     readonly property color bg1Pressed: light ? "#e0e0e0" : "#1f1f1f"
@@ -51,13 +43,11 @@ Singleton {
     readonly property color cardHover: light ? "#e8e8e8" : "#2b2b2b"
     readonly property color cardPressed: light ? "#e0e0e0" : "#333333"
 
-    // Mono active — same language as NBattery (fg1 fill on dark track).
     readonly property color active: light ? "#242424" : "#ffffff"
     readonly property color activeFg: light ? "#ffffff" : "#1a1a1a"
     readonly property color activeHover: light ? "#3a3a3a" : "#e0e0e0"
     readonly property color activePressed: light ? "#101010" : "#c4c4c4"
 
-    // Deprecated: accent config is ignored in mono mode. Kept for compat.
     readonly property bool customAccent: false
     readonly property color accentBase: active
     readonly property color brandBg: active
@@ -107,9 +97,6 @@ Singleton {
     readonly property color textPrimary: fg1
     readonly property color textSecondary: fg2
 
-    // Tonal roles — all neutral in mono mode (no purple/blue containers).
-    // Note: QML reserves the `on*` prefix for signal handlers, so M3 `onX`
-    // roles are named `xFg` instead.
     readonly property color primary: active
     readonly property color primaryFg: activeFg
     readonly property color primaryContainer: light ? "#e8e8e8" : "#2b2b2b"
@@ -117,12 +104,12 @@ Singleton {
     readonly property color surfaceContainer: bg2
     readonly property color surfaceContainerHigh: subtleHover
     readonly property color surfaceVariantFg: fg2
-    // Secondary/tertiary containers — slider track, chips, icon wells.
+
     readonly property color secondaryContainer: light ? "#e8e8e8" : "#2b2b2b"
     readonly property color secondaryContainerFg: fg2
     readonly property color tertiaryContainer: light ? "#e8e8e8" : "#2b2b2b"
     readonly property color tertiaryContainerFg: fg1
-    // Error roles (badges / destructive hints).
+
     readonly property color error: light ? "#ba1a1a" : "#ffb4ab"
     readonly property color errorContainer: light ? "#ffdad6" : "#93000a"
 

@@ -2,9 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import qs.ndesign
 
-// OneUI 9 quick tile: tonal card (radius 20) + circle icon well.
-// ON = mono active well (white in dark, near-black in light, like NBattery),
-// OFF = gray well. Card itself stays tonal.
 Rectangle {
     id: root
     property string icon: ""

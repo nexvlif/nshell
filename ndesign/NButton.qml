@@ -2,11 +2,10 @@ import QtQuick
 import QtQuick.Layouts
 import qs.ndesign
 
-// OneUI 9 mono button: primary filled active, secondary tonal, subtle text, outline stroked.
 Rectangle {
     id: root
     property string text: ""
-    property string variant: "subtle" // primary | secondary | subtle | outline
+    property string variant: "subtle"
     property bool primary: false
     property string icon: ""
     property bool disabled: false
