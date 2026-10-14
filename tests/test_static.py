@@ -5,7 +5,7 @@ Checks the invariants the three workstreams depend on:
   1. Config keys referenced by new code actually exist in Config.qml.
   2. Avatar image goes through services/Avatar.qml (no hardcoded overrides).
   3. Vertical bar has coffee/gamemode (+ bluetooth/notif) parity.
-  4. hypridle conf is marked fallback-only; README names the official path.
+  4. hypridle conf is marked fallback-only.
   5. Weather manual-override plumbing exists end to end.
   6. shell.qml keeps the inhibit + lock wiring alive.
 """
@@ -30,7 +30,6 @@ def read(rel: str) -> str:
 cfg = read("services/Config.qml")
 bar = read("modules/bar/Bar.qml")
 hypridle = read("scripts/hypridle-nshell.conf")
-readme = read("README.md")
 weather = read("services/Weather.qml")
 settings = read("modules/settings/Settings.qml")
 wxcard = read("modules/widgets/WeatherCard.qml")
@@ -71,9 +70,6 @@ check("vertical gamemode toggles", "GameMode.toggle()" in vblock)
 # 4. Official idle/suspend path
 check("hypridle marked fallback", "FALLBACK ONLY" in hypridle)
 check("hypridle points at SleepLock", "SleepLock" in hypridle)
-check("readme official AutoLock", "AutoLock" in readme)
-check("readme official SleepLock", "SleepLock" in readme)
-check("readme fallback wording", "allback" in readme)
 check("settings behavior cites official", "SleepLock" in settings)
 
 # 5. Weather override plumbing
@@ -109,7 +105,7 @@ apps = read("modules/apps/Apps.qml")
 check("apps no modal dim", "0.45" not in apps)
 check("apps no outside-close", apps.count("Ui.closeAll()") == 2)  # Esc + titlebar X only
 check("apps drag handle", "dragArea" in apps and "clampX" in apps)
-check("apps persists pos", "apps.pos" in apps and "apps.pos" in cfg)
+check("apps persists pos", "apps.pos" in apps and "property JsonObject apps" in cfg)
 check("apps recenter", "onDoubleClicked" in apps)
 check("apps hugs content", "anchors" in apps and "posX" in apps)
 

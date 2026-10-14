@@ -49,9 +49,9 @@ Singleton {
         let code = "";
         if (opt === "general:col.active_border") {
             const ab = activeBorder();
-            code = "hl.config({ general = { col = { active_border = { colors = { \"" + ab.colors[0] + "\", \"" + ab.colors[1] + "\" }, angle = " + ab.angle + " } } } })";
+            code = "hl.config({ general = { col = { active_border = { colors = { \"" + hexToRgba(ab.colors[0]) + "\", \"" + hexToRgba(ab.colors[1]) + "\" }, angle = " + ab.angle + " } } } })";
         } else if (opt === "general:col.inactive_border") {
-            code = "hl.config({ general = { col = { inactive_border = \"" + firstColor(str(opt, "rgba(131313aa)"), "rgba(131313aa)") + "\" } } } })";
+            code = "hl.config({ general = { col = { inactive_border = \"" + hexToRgba(firstColor(str(opt, "rgba(131313aa)"), "rgba(131313aa)")) + "\" } } } })";
         } else {
             const v = vals[opt];
             let luaVal = "nil";
@@ -111,6 +111,15 @@ Singleton {
         let c = (s || "").replace(/[^a-zA-Z0-9(),.#]/g, "");
         return c === "" ? fallback : c;
     }
+    function hexToRgba(s: string): string {
+        let m = (s || "").match(/^([0-9a-fA-F]{2})([0-9a-fA-F]{6})$/);
+        if (m)
+            return "rgba(" + m[2] + m[1] + ")";
+        m = (s || "").match(/^([0-9a-fA-F]{6})$/);
+        if (m)
+            return "rgb(" + m[1] + ")";
+        return s;
+    }
     function firstColor(s: string, fallback: string): string {
         const parts = (s || "").trim().split(/\s+/);
         for (let i = 0; i < parts.length; ++i) {
@@ -147,7 +156,7 @@ Singleton {
 
     function managedText(): string {
         const ab = activeBorder();
-        const ib = firstColor(str("general:col.inactive_border", "rgba(131313aa)"), "rgba(131313aa)");
+        const ib = hexToRgba(firstColor(str("general:col.inactive_border", "rgba(131313aa)"), "rgba(131313aa)"));
         const layout = str("general:layout", "dwindle");
         const okLayout = ["dwindle", "master", "scrolling"].includes(layout) ? layout : "dwindle";
         const kbLayout = cleanText(str("input:kb_layout", "us")) || "us";
@@ -167,7 +176,7 @@ Singleton {
         L.push("    resize_on_border = " + (boolean("general:resize_on_border", true) ? "true" : "false") + ",");
         L.push("    allow_tearing = " + (boolean("general:allow_tearing", false) ? "true" : "false") + ",");
         L.push("    col = {");
-        L.push("      active_border = { colors = { \"" + ab.colors[0] + "\", \"" + ab.colors[1] + "\" }, angle = " + ab.angle + " },");
+        L.push("      active_border = { colors = { \"" + hexToRgba(ab.colors[0]) + "\", \"" + hexToRgba(ab.colors[1]) + "\" }, angle = " + ab.angle + " },");
         L.push("      inactive_border = \"" + ib + "\",");
         L.push("    },");
         L.push("  },");
@@ -231,11 +240,11 @@ Singleton {
         Quickshell.execDetached(["sh", "-c", "xdg-open \"$HOME/.config/nshell/config.json\" 2>/dev/null || true"]);
     }
     function copySettingsSnippet(): void {
-        Quickshell.execDetached(["sh", "-c", "printf '%s' 'hl.bind(\"SUPER + comma\", hl.dsp.global(\"nshell:settingsToggle\"), { description = \"nshell: Settings\" })' | wl-copy 2>/dev/null; notify-send 'nshell' 'Keybind snippet copied — paste into hyprland.lua' 2>/dev/null || true"]);
+        Quickshell.execDetached(["sh", "-c", "printf '%s' 'hl.bind(\"SUPER + comma\", hl.dsp.global(\"nshell:settingsToggle\"), { description = \"nshell: Settings\" })' | wl-copy 2>/dev/null; notify-send 'nshell' 'Keybind snippet copied — paste into conf/50-binds.lua' 2>/dev/null || true"]);
     }
     function copyLockSnippet(): void {
         const snippet = "hl.bind(mainMod .. \" + L\", hl.dsp.exec_cmd(\"qs -p " + Quickshell.shellDir + "/shell.qml ipc call nshell lock\"), { description = \"nshell: Lock\" })";
-        Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy 2>/dev/null; notify-send 'nshell' 'Lock bind snippet copied — paste into hyprland.lua' 2>/dev/null || true", "sh", snippet]);
+        Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy 2>/dev/null; notify-send 'nshell' 'Lock bind snippet copied — paste into conf/50-binds.lua' 2>/dev/null || true", "sh", snippet]);
     }
 
     function modText(m: int): string {

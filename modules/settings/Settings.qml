@@ -1056,7 +1056,7 @@ Scope {
                                 SSection {
                                     Layout.fillWidth: true
                                     title: "Global toggle"
-                                    desc: "Per-animation curves and speeds are defined in hyprland.lua."
+                                    desc: "Per-animation curves and speeds are defined in conf/41-animations.lua."
                                     SSwitchRow {
                                         icon: "animation"
                                         title: "Animations enabled"
@@ -1066,7 +1066,7 @@ Scope {
                                     SRow {
                                         icon: "code"
                                         title: "Fine-tune curves"
-                                        sub: "Edit hl.curve / hl.animation blocks in hyprland.lua"
+                                        sub: "Edit hl.curve / hl.animation blocks in conf/41-animations.lua"
                                         NButton {
                                             variant: "secondary"
                                             text: "Open file"
@@ -1186,7 +1186,7 @@ Scope {
                                 NText {
                                     kind: "caption"
                                     color: Theme.fg3
-                                    text: HyprConf.binds.length + " bindings live from Hyprland. Binds are defined in hyprland.lua — this list is read-only."
+                                    text: HyprConf.binds.length + " bindings live from Hyprland. Binds are defined in conf/50-binds.lua — this list is read-only."
                                 }
                                 RowLayout {
                                     Layout.fillWidth: true
