@@ -95,12 +95,16 @@ Singleton {
         }
     }
     function loadBinds(): void {
-        if (!bindProc.running)
+        if (!bindProc.running) {
+            bindProc.command = ["hyprctl", "binds", "-j"];
             bindProc.running = true;
+        }
     }
     function checkIntegrated(): void {
-        if (!intCheck.running)
+        if (!intCheck.running) {
+            intCheck.command = ["grep", "-q", "nshell-managed", root.managedPath];
             intCheck.running = true;
+        }
     }
 
     function cleanColor(s: string, fallback: string): string {
@@ -229,6 +233,10 @@ Singleton {
     function copySettingsSnippet(): void {
         Quickshell.execDetached(["sh", "-c", "printf '%s' 'hl.bind(\"SUPER + comma\", hl.dsp.global(\"nshell:settingsToggle\"), { description = \"nshell: Settings\" })' | wl-copy 2>/dev/null; notify-send 'nshell' 'Keybind snippet copied — paste into hyprland.lua' 2>/dev/null || true"]);
     }
+    function copyLockSnippet(): void {
+        const snippet = "hl.bind(mainMod .. \" + L\", hl.dsp.exec_cmd(\"qs -p " + Quickshell.shellDir + "/shell.qml ipc call nshell lock\"), { description = \"nshell: Lock\" })";
+        Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy 2>/dev/null; notify-send 'nshell' 'Lock bind snippet copied — paste into hyprland.lua' 2>/dev/null || true", "sh", snippet]);
+    }
 
     function modText(m: int): string {
         const p = [];
@@ -285,7 +293,6 @@ Singleton {
     }
     Process {
         id: bindProc
-        command: ["sh", "-c", "hyprctl binds -j"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -297,10 +304,7 @@ Singleton {
     }
     Process {
         id: intCheck
-        command: ["sh", "-c", "grep -q 'nshell-managed' \"$HOME/.config/hypr/hyprland.lua\" 2>/dev/null && echo yes || echo no"]
-        stdout: StdioCollector {
-            onStreamFinished: root.integrated = text.trim() === "yes"
-        }
+        onExited: exitCode => root.integrated = exitCode === 0
     }
 
     Component.onCompleted: {

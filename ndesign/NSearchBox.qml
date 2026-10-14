@@ -10,6 +10,7 @@ Rectangle {
     property alias text: input.text
     property alias field: input
     signal accepted
+    signal escapePressed
 
     implicitHeight: 40
     radius: Tokens.rounding.pill
@@ -41,6 +42,7 @@ Rectangle {
             font.pixelSize: Tokens.font.body
             clip: true
             Keys.onReturnPressed: root.accepted()
+            Keys.onEscapePressed: root.escapePressed()
         }
     }
 }

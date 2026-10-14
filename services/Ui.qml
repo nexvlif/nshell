@@ -33,6 +33,17 @@ Singleton {
     property string wallMoveTarget: ""
     property bool imgPickerOpen: false
     property var imgPickerScreen: null
+    property bool lockOpen: false
+    property bool appsOpen: false
+    property string appPage: "calc"
+
+    function showLock(): void {
+        closeAll();
+        lockOpen = true;
+    }
+    function hideLock(): void {
+        lockOpen = false;
+    }
 
     function openWallMenu(x, y, screen): void {
         wallMenuX = x;
@@ -73,6 +84,7 @@ Singleton {
         galleryOpen = false;
         fileOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         launcherOpen = !launcherOpen;
     }
     function toggleSession(): void {
@@ -89,6 +101,7 @@ Singleton {
         galleryOpen = false;
         fileOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         sessionOpen = !sessionOpen;
     }
     function toggleNflyout(): void {
@@ -105,6 +118,7 @@ Singleton {
         galleryOpen = false;
         fileOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         nflyoutOpen = !nflyoutOpen;
     }
     function toggleControl(): void {
@@ -121,10 +135,12 @@ Singleton {
         galleryOpen = false;
         fileOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         controlOpen = !controlOpen;
     }
     function toggleClipboard(): void {
         clipOpen = !clipOpen;
+        appsOpen = false;
         closeWallMenu();
         launcherOpen = false;
         sessionOpen = false;
@@ -152,6 +168,7 @@ Singleton {
         galleryOpen = false;
         fileOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         notifOpen = !notifOpen;
         if (notifOpen) {
             Notifs.clearPopup();
@@ -172,6 +189,7 @@ Singleton {
         galleryOpen = false;
         fileOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         calendarOpen = !calendarOpen;
     }
     function toggleScreenshot(): void {
@@ -187,6 +205,7 @@ Singleton {
         galleryOpen = false;
         fileOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         screenshotOpen = !screenshotOpen;
     }
     function toggleRecording(): void {
@@ -202,6 +221,7 @@ Singleton {
         galleryOpen = false;
         fileOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         recordingOpen = !recordingOpen;
     }
     function toggleGallery(): void {
@@ -216,6 +236,7 @@ Singleton {
         screenshotOpen = false;
         recordingOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         galleryOpen = !galleryOpen;
     }
     function toggleSettings(): void {
@@ -232,6 +253,7 @@ Singleton {
         recordingOpen = false;
         galleryOpen = false;
         fileOpen = false;
+        appsOpen = false;
         settingsOpen = !settingsOpen;
     }
     function toggleFileManager(): void {
@@ -248,10 +270,39 @@ Singleton {
         recordingOpen = false;
         galleryOpen = false;
         settingsOpen = false;
+        appsOpen = false;
         fileOpen = !fileOpen;
+    }
+    function openApp(page: string): void {
+        closeAll();
+        appPage = page;
+        appsOpen = true;
+    }
+    function toggleApps(page: string): void {
+        if (appsOpen && appPage === page) {
+            appsOpen = false;
+            return;
+        }
+        clipOpen = false;
+        closeTrayMenu();
+        closeWallMenu();
+        launcherOpen = false;
+        sessionOpen = false;
+        nflyoutOpen = false;
+        controlOpen = false;
+        notifOpen = false;
+        calendarOpen = false;
+        screenshotOpen = false;
+        recordingOpen = false;
+        galleryOpen = false;
+        fileOpen = false;
+        settingsOpen = false;
+        appPage = page;
+        appsOpen = true;
     }
     function closeAll(): void {
         clipOpen = false;
+        appsOpen = false;
         closeTrayMenu();
         closeWallMenu();
         launcherOpen = false;

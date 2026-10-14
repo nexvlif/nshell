@@ -2,15 +2,16 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.services
 
 Singleton {
     id: root
 
     function lock(): void {
-        Quickshell.execDetached(["loginctl", "lock-session"]);
+        Ui.showLock();
     }
     function logout(): void {
-        Quickshell.execDetached(["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"]);
+        Quickshell.execDetached(["sh", "-c", "hyprctl dispatch exit 2>/dev/null || loginctl terminate-session"]);
     }
     function suspend(): void {
         Quickshell.execDetached(["systemctl", "suspend"]);

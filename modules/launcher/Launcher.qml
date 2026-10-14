@@ -93,6 +93,36 @@ Scope {
                     icon: "power_settings_new",
                     run: Session.poweroff
                 }].filter(c => !q || (c.name + " " + c.sub).toLowerCase().includes(q));
+                const napps = [{
+                    name: "Calculator",
+                    sub: "nshell app",
+                    icon: "calculate",
+                    run: () => Ui.openApp("calc")
+                }, {
+                    name: "Camera",
+                    sub: "nshell app",
+                    icon: "photo_camera",
+                    run: () => Ui.openApp("camera")
+                }, {
+                    name: "Voice recorder",
+                    sub: "nshell app",
+                    icon: "mic",
+                    run: () => Ui.openApp("rec")
+                }].filter(c => !q || (c.name + " " + c.sub).toLowerCase().includes(q));
+                if (napps.length > 0) {
+                    out.push({
+                        kind: "header",
+                        name: "nshell"
+                    });
+                    for (const c of napps)
+                        out.push({
+                            kind: "cmd",
+                            name: c.name,
+                            sub: c.sub,
+                            icon: c.icon,
+                            run: c.run
+                        });
+                }
                 if (cmds.length > 0) {
                     out.push({
                         kind: "header",

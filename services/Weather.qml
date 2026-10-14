@@ -16,6 +16,14 @@ Singleton {
     property real lat: -6.2
     property real lon: 106.8
 
+    // Manual override via Config (Settings > Widgets > Weather).
+    // Sentinel 9999 = "not set". When autoLocate is on (default) the IP
+    // lookup wins; when off and lat/lon are set, the manual values win.
+    readonly property bool cfgAuto: Config.options.weather.autoLocate !== false
+    readonly property real cfgLat: Config.options.weather.lat ?? 9999
+    readonly property real cfgLon: Config.options.weather.lon ?? 9999
+    readonly property string cfgPlace: Config.options.weather.place ?? ""
+
     readonly property string icon: {
         if (code < 0)
             return "cloudy";
@@ -69,7 +77,53 @@ Singleton {
         wxProc.running = true;
     }
 
-    Component.onCompleted: locate()
+    // Manual city: empty place keeps the previous label.
+    function setManual(mLat: real, mLon: real, mPlace: string): void {
+        Config.set("weather.autoLocate", false);
+        Config.set("weather.lat", mLat);
+        Config.set("weather.lon", mLon);
+        if (mPlace !== "")
+            Config.set("weather.place", mPlace);
+        root.lat = mLat;
+        root.lon = mLon;
+        if (mPlace !== "")
+            root.place = mPlace;
+        root.fetch();
+    }
+    function setAuto(on: bool): void {
+        Config.set("weather.autoLocate", on);
+        if (on)
+            root.locate();
+    }
+    function applyConfig(): void {
+        if (!root.cfgAuto && root.cfgLat < 9000 && root.cfgLon < 9000) {
+            root.lat = root.cfgLat;
+            root.lon = root.cfgLon;
+            if (root.cfgPlace !== "")
+                root.place = root.cfgPlace;
+            root.fetch();
+        }
+    }
+    onCfgAutoChanged: {
+        if (root.cfgAuto)
+            root.locate();
+        else
+            root.applyConfig();
+    }
+    onCfgLatChanged: root.applyConfig()
+    onCfgLonChanged: root.applyConfig()
+
+    Component.onCompleted: {
+        if (!root.cfgAuto && root.cfgLat < 9000 && root.cfgLon < 9000) {
+            root.lat = root.cfgLat;
+            root.lon = root.cfgLon;
+            if (root.cfgPlace !== "")
+                root.place = root.cfgPlace;
+            root.fetch();
+        } else {
+            root.locate();
+        }
+    }
 
     Timer {
         interval: 900000

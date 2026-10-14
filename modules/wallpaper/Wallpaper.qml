@@ -300,7 +300,7 @@ Scope {
                         text: "Unlocked: drag cards to move, lock to interact"
                     }
                     Repeater {
-                        model: [["locked", "Lock positions"], ["enabled", "Show widgets"], ["clock", "Clock"], ["week", "Week strip"], ["stats", "Stats tiles"], ["weather", "Weather"], ["worldclock", "World clock"], ["todo", "To-Do"], ["notes", "Notes"], ["timers", "Timers"], ["media", "Media"], ["battery", "Battery"], ["net", "Network"], ["image", "Image"]]
+                        model: [["locked", "Lock positions"], ["enabled", "Show widgets"]].concat(WidgetReg.widgets.map(w => [w.id, w.title]))
                         delegate: RowLayout {
                             required property var modelData
                             required property int index
@@ -399,9 +399,9 @@ Scope {
                             required property var modelData
                             width: 208
                             height: 124
-                            NRoundedImage {
+                            NThumb {
                                 anchors.fill: parent
-                                source: "file://" + modelData
+                                file: modelData
                                 imgRadius: Tokens.rounding.medium
                             }
                             Rectangle {

@@ -1,13 +1,11 @@
 # nshell
 
-## Run
+A desktop shell
 
-```bash
-qs --path ~/Projects/nshell/shell.qml
+nshell brings the desktop bar, application launcher, control center, widgets, and session locking into a single configurable shell, with a collection of lightweight everyday apps built in.
 
-```
+<p align="center">
+  <img src="assets/screenshot.png" alt="nshell desktop overview" width="100%">
+</p>
 
-## Config
-
-- `~/.config/nshell/config.json`
-- Hot-reload via `FileView.watchChanges`
+Just use it

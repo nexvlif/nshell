@@ -48,12 +48,16 @@ Singleton {
     readonly property color activeHover: light ? "#3a3a3a" : "#e0e0e0"
     readonly property color activePressed: light ? "#101010" : "#c4c4c4"
 
-    readonly property bool customAccent: false
-    readonly property color accentBase: active
-    readonly property color brandBg: active
-    readonly property color brandBgHover: activeHover
-    readonly property color brandBgPressed: activePressed
-    readonly property color brandBgSelected: active
+    readonly property string accentHex: {
+        const a = (Config.options.theme.accent || "").trim();
+        return /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(a) ? a : "";
+    }
+    readonly property bool customAccent: accentHex !== ""
+    readonly property color accentBase: customAccent ? accentHex : active
+    readonly property color brandBg: accentBase
+    readonly property color brandBgHover: customAccent ? hover(accentBase) : activeHover
+    readonly property color brandBgPressed: customAccent ? pressed(accentBase) : activePressed
+    readonly property color brandBgSelected: accentBase
     readonly property color brandFg1: fg1
     readonly property color brandFg2: fg1
     readonly property color brandFgOnLight: fg1
@@ -72,7 +76,7 @@ Singleton {
     readonly property string fontFamily: "Roboto, Inter, Cantarell, sans-serif"
     readonly property string fontMono: "Roboto Mono, Consolas, monospace"
 
-    readonly property color accent: active
+    readonly property color accent: accentBase
     readonly property color accentFg: activeFg
     readonly property color bg: bg1
     readonly property color bgSolid: bg1
@@ -97,7 +101,7 @@ Singleton {
     readonly property color textPrimary: fg1
     readonly property color textSecondary: fg2
 
-    readonly property color primary: active
+    readonly property color primary: accentBase
     readonly property color primaryFg: activeFg
     readonly property color primaryContainer: light ? "#e8e8e8" : "#2b2b2b"
     readonly property color primaryContainerFg: fg1

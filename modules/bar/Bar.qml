@@ -90,6 +90,7 @@ Scope {
                         spacing: 8
                         NRect {
                             Layout.preferredHeight: pillSize
+                            visible: Config.options.bar.showClock
                             implicitWidth: clockRow.implicitWidth + Config.options.bar.pillPadding
                             corner: Tokens.rounding.xxlarge
                             fill: "bg1"
@@ -375,6 +376,38 @@ Scope {
                             }
                         }
                         Item {
+                            visible: Coffee.enabled
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            NIcon {
+                                anchors.centerIn: parent
+                                name: "coffee"
+                                iconSize: 18
+                                color: Theme.brandBg
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Coffee.toggle()
+                            }
+                        }
+                        Item {
+                            visible: GameMode.enabled
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            NIcon {
+                                anchors.centerIn: parent
+                                name: "sports_esports"
+                                iconSize: 18
+                                color: Theme.brandBg
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: GameMode.toggle()
+                            }
+                        }
+                        Item {
                             implicitWidth: 32
                             implicitHeight: 32
                             NIconButton {
@@ -424,7 +457,7 @@ Scope {
 
                         NAvatar {
                             diameter: Config.options.bar.avatarSize
-                            source: "file://" + Quickshell.env("HOME") + "/Pictures/pp.jpg"
+                            source: Avatar.source
                             onClicked: Ui.toggleSession()
                         }
 
@@ -544,7 +577,7 @@ Scope {
                     NAvatar {
                         Layout.alignment: Qt.AlignHCenter
                         diameter: Config.options.bar.avatarSize
-                        source: "file://" + Quickshell.env("HOME") + "/Pictures/pp.jpg"
+                        source: Avatar.source
                         onClicked: Ui.toggleSession()
                     }
                     NIconButton {
@@ -691,6 +724,79 @@ Scope {
                             percent: Battery.percent
                             charging: Battery.charging
                             critical: Battery.critical
+                        }
+                        Item {
+                            Layout.alignment: Qt.AlignHCenter
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            NIcon {
+                                anchors.centerIn: parent
+                                name: Bluetooth.icon
+                                filled: Bluetooth.connectedName !== ""
+                                iconSize: 18
+                                color: Bluetooth.connectedName !== "" ? Theme.fg2 : Theme.fg3
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Ui.toggleControl()
+                            }
+                        }
+                        Item {
+                            Layout.alignment: Qt.AlignHCenter
+                            visible: Coffee.enabled
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            NIcon {
+                                anchors.centerIn: parent
+                                name: "coffee"
+                                iconSize: 18
+                                color: Theme.brandBg
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Coffee.toggle()
+                            }
+                        }
+                        Item {
+                            Layout.alignment: Qt.AlignHCenter
+                            visible: GameMode.enabled
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            NIcon {
+                                anchors.centerIn: parent
+                                name: "sports_esports"
+                                iconSize: 18
+                                color: Theme.brandBg
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: GameMode.toggle()
+                            }
+                        }
+                        Item {
+                            Layout.alignment: Qt.AlignHCenter
+                            implicitWidth: 32
+                            implicitHeight: 32
+                            NIconButton {
+                                anchors.fill: parent
+                                name: Notifs.dnd ? "notifications_off" : "notifications"
+                                restColor: Notifs.dnd ? Theme.brandBg : (Ui.notifOpen ? Theme.brandFg1 : Theme.fg2)
+                                onClicked: Ui.toggleNotif()
+                            }
+                            Rectangle {
+                                visible: Notifs.unread > 0
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+                                anchors.topMargin: 2
+                                anchors.rightMargin: 2
+                                implicitWidth: 10
+                                implicitHeight: 10
+                                radius: 5
+                                color: Theme.error
+                            }
                         }
                         NIconButton {
                             Layout.alignment: Qt.AlignHCenter

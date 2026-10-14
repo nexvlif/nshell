@@ -15,6 +15,9 @@ Singleton {
     property bool scanning: false
     property string connecting: ""
     property string lastError: ""
+    property var vpns: []
+    property string vpnActive: ""
+    property bool vpnBusy: false
 
     readonly property string icon: {
         if (!wifiEnabled || !connected)
@@ -25,6 +28,7 @@ Singleton {
     function poll(): void {
         if (!proc.running)
             proc.running = true;
+        pollVpn();
     }
 
     function scan(): void {
@@ -56,6 +60,60 @@ Singleton {
         if (root.iface !== "")
             Quickshell.execDetached(["nmcli", "device", "disconnect", root.iface]);
         repollTimer.restart();
+    }
+
+    function pollVpn(): void {
+        if (!vpnProc.running)
+            vpnProc.running = true;
+    }
+
+    function vpnUp(name: string): void {
+        if (root.vpnBusy || name === "" || vpnProc.running)
+            return;
+        root.vpnBusy = true;
+        vpnToggle.command = ["nmcli", "connection", "up", name];
+        vpnToggle.running = true;
+    }
+
+    function vpnDown(): void {
+        if (root.vpnBusy || root.vpnActive === "" || vpnProc.running)
+            return;
+        root.vpnBusy = true;
+        vpnToggle.command = ["nmcli", "connection", "down", root.vpnActive];
+        vpnToggle.running = true;
+    }
+
+    function parseVpns(text: string, active: bool): void {
+        const out = active ? [] : root.vpns.slice();
+        const seen = {};
+        for (const n of out)
+            seen[n] = true;
+        for (const line of text.trim().split("\n")) {
+            const t = line.trim();
+            if (t === "")
+                continue;
+            const tmp = t.replace(/\\:/g, "\x00");
+            const i = tmp.lastIndexOf(":");
+            if (i < 0)
+                continue;
+            const type = tmp.slice(i + 1);
+            if (type !== "vpn" && type !== "wireguard")
+                continue;
+            const name = tmp.slice(0, i).replace(/\x00/g, ":").trim();
+            if (name === "")
+                continue;
+            if (active) {
+                out.push(name);
+            } else if (!seen[name]) {
+                seen[name] = true;
+                out.push(name);
+            }
+        }
+        if (active) {
+            root.vpnActive = out.length > 0 ? out[0] : "";
+        } else {
+            root.vpns = out;
+        }
     }
 
     function parseNets(text: string): void {
@@ -186,6 +244,30 @@ Singleton {
             if (exitCode !== 0)
                 root.lastError = connErr.text.trim().split("\n").filter(l => l.indexOf("Error") >= 0).join(" ") || "Failed to connect";
             root.connecting = "";
+            repollTimer.restart();
+        }
+    }
+
+    Process {
+        id: vpnProc
+        command: ["sh", "-c", "nmcli -t -f NAME,TYPE connection show; echo ---VPN-ACTIVE---; nmcli -t -f NAME,TYPE connection show --active"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const marker = "---VPN-ACTIVE---";
+                const mi = text.indexOf(marker);
+                const all = mi >= 0 ? text.slice(0, mi) : text;
+                const act = mi >= 0 ? text.slice(mi + marker.length) : "";
+                root.parseVpns(all, false);
+                root.parseVpns(act, true);
+            }
+        }
+    }
+
+    Process {
+        id: vpnToggle
+        onExited: {
+            root.vpnBusy = false;
+            root.pollVpn();
             repollTimer.restart();
         }
     }

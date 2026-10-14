@@ -114,28 +114,23 @@ Singleton {
             Quickshell.execDetached(["xdg-open", item.path]);
     }
 
-    function shQuote(s: string): string {
-        return "'" + s.split("'").join("'\"'\"'") + "'";
-    }
-
     function newFolder(): void {
-        const cmd = "d=" + shQuote(root.dir) + "; n='New folder'; i=1; while [ -e \"$d/$n\" ]; do i=$((i+1)); n=\"New folder $i\"; done; mkdir -p \"$d/$n\"";
-        Quickshell.execDetached(["sh", "-c", cmd]);
+        const n = "New folder " + Qt.formatDateTime(new Date(), "yyyyMMdd-HHmmss");
+        Quickshell.execDetached(["mkdir", "-p", root.dir + "/" + n]);
         refreshTimer.restart();
     }
 
     function trashEntry(item: var): void {
         if (!item)
             return;
-        const safe = shQuote(item.path);
-        Quickshell.execDetached(["sh", "-c", "if command -v gio >/dev/null 2>&1; then gio trash " + safe + " && notify-send 'Files' 'Moved to trash'; else notify-send 'Files' 'Install gio to trash files'; fi"]);
+        Quickshell.execDetached(["sh", "-c", "p=\"$1\"; if command -v gio >/dev/null 2>&1; then gio trash \"$p\" && notify-send 'Files' 'Moved to trash'; else notify-send 'Files' 'Install gio to trash files'; fi", "sh", item.path]);
         refreshTimer.restart();
     }
 
     function copyPath(item: var): void {
         if (!item)
             return;
-        Quickshell.execDetached(["sh", "-c", "printf '%s' " + shQuote(item.path) + " | wl-copy && notify-send 'Files' 'Path copied'"]);
+        Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy && notify-send 'Files' 'Path copied'", "sh", item.path]);
     }
 
     Timer {

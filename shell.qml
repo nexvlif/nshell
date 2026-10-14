@@ -2,6 +2,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import qs.modules.bar
 import qs.modules.launcher
 import qs.modules.session
@@ -20,12 +21,21 @@ import qs.modules.widgets
 import qs.modules.wallpaper
 import qs.modules.settings
 import qs.modules.filemanager
+import qs.modules.apps
+import qs.modules.lock
+import qs.modules.polkit
 import qs.services
 
 ShellRoot {
     id: root
 
     property var _cfg: Config
+    property var _autoLock: AutoLock
+    property var _sleepLock: SleepLock
+
+    IdleInhibitor {
+        enabled: Coffee.enabled || GameMode.enabled
+    }
 
     IpcHandler {
         target: "nshell"
@@ -47,6 +57,12 @@ ShellRoot {
         }
         function toggleSettings(): void {
             Ui.toggleSettings();
+        }
+        function openApp(app: string): void {
+            Ui.openApp(app);
+        }
+        function lock(): void {
+            Session.lock();
         }
     }
 
@@ -80,13 +96,52 @@ ShellRoot {
     ScreenshotSelector {}
     ScreenshotCountdown {}
     RecordingPanel {}
-    GalleryPanel {}
     Shortcuts {}
     Notifications {}
     Osd {}
     Widgets {}
-    ImagePicker {}
-    FileManager {}
     Wallpaper {}
-    Settings {}
+    Loader {
+        id: galleryLoader
+        active: Ui.galleryOpen || primed
+        property bool primed: false
+        onActiveChanged: {
+            if (active)
+                primed = true;
+        }
+        sourceComponent: GalleryPanel {}
+    }
+    Loader {
+        id: pickerLoader
+        active: Ui.imgPickerOpen || primed
+        property bool primed: false
+        onActiveChanged: {
+            if (active)
+                primed = true;
+        }
+        sourceComponent: ImagePicker {}
+    }
+    Loader {
+        id: filesLoader
+        active: Ui.fileOpen || primed
+        property bool primed: false
+        onActiveChanged: {
+            if (active)
+                primed = true;
+        }
+        sourceComponent: FileManager {}
+    }
+    Loader {
+        id: settingsLoader
+        active: Ui.settingsOpen || primed
+        property bool primed: false
+        onActiveChanged: {
+            if (active)
+                primed = true;
+        }
+        sourceComponent: Settings {}
+    }
+    Apps {}
+    LockScreen {}
+    PolkitDialog {}
 }

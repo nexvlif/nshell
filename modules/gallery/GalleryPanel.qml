@@ -324,13 +324,14 @@ Scope {
                             readonly property string ext: modelData.folder ? "" : modelData.name.split(".").pop().toUpperCase()
                             width: 216
                             height: 192
-                            NRoundedImage {
+                            NThumb {
                                 x: 8
                                 y: 0
                                 width: 200
                                 height: 148
                                 visible: !modelData.folder && !modelData.video
-                                source: "file://" + modelData.path + "?rev=" + Gallery.rev
+                                file: (!modelData.folder && !modelData.video) ? modelData.path : ""
+                                rev: Gallery.rev
                                 imgRadius: Tokens.rounding.large
                             }
                             Rectangle {

@@ -46,6 +46,11 @@ Scope {
             "label": "Launcher"
         },
         {
+            "id": "behavior",
+            "icon": "settings_suggest",
+            "label": "Behavior"
+        },
+        {
             "group": "Hyprland"
         },
         {
@@ -128,6 +133,7 @@ Scope {
                     HyprConf.refresh();
                     HyprConf.loadBinds();
                     HyprConf.checkIntegrated();
+                    Backup.refreshList();
                 }
             }
 
@@ -288,6 +294,14 @@ Scope {
                                         current: Config.options.theme.mode
                                         onPicked: v => Config.set("theme.mode", v)
                                     }
+                                    SChoiceRow {
+                                        icon: "palette"
+                                        title: "Accent color"
+                                        sub: "Recolors buttons, toggles and highlights"
+                                        options: [["", "Auto"], ["#479ef5", "Blue"], ["#43a047", "Green"], ["#fb8c00", "Orange"], ["#e53935", "Red"], ["#8e24aa", "Purple"], ["#00acc1", "Teal"]]
+                                        current: Config.options.theme.accent ?? ""
+                                        onPicked: v => Config.set("theme.accent", v)
+                                    }
                                 }
                             }
 
@@ -349,6 +363,13 @@ Scope {
                                         step: 1
                                         suffix: "px"
                                         onMoved: v => Config.set("bar.avatarSize", Math.round(v))
+                                    }
+                                    STextRow {
+                                        icon: "photo"
+                                        title: "Avatar image"
+                                        value: Config.options.bar.avatarPath ?? ""
+                                        placeholder: "/path/to/avatar (empty = ~/Pictures/pp.jpg)"
+                                        onCommitted: text => Config.set("bar.avatarPath", text)
                                     }
                                     SSliderRow {
                                         icon: "shadow"
@@ -521,65 +542,14 @@ Scope {
                                         checked: Config.options.widgets.locked !== false
                                         onToggled: Config.set("widgets.locked", !(Config.options.widgets.locked !== false))
                                     }
-                                    SSwitchRow {
-                                        title: "Clock"
-                                        checked: Config.options.widgets.clock === true
-                                        onToggled: Config.set("widgets.clock", !(Config.options.widgets.clock === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "Week strip"
-                                        checked: Config.options.widgets.week === true
-                                        onToggled: Config.set("widgets.week", !(Config.options.widgets.week === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "Stats tiles"
-                                        checked: Config.options.widgets.stats === true
-                                        onToggled: Config.set("widgets.stats", !(Config.options.widgets.stats === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "Weather"
-                                        checked: Config.options.widgets.weather === true
-                                        onToggled: Config.set("widgets.weather", !(Config.options.widgets.weather === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "World clock"
-                                        checked: Config.options.widgets.worldclock === true
-                                        onToggled: Config.set("widgets.worldclock", !(Config.options.widgets.worldclock === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "To-Do"
-                                        checked: Config.options.widgets.todo === true
-                                        onToggled: Config.set("widgets.todo", !(Config.options.widgets.todo === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "Notes"
-                                        checked: Config.options.widgets.notes === true
-                                        onToggled: Config.set("widgets.notes", !(Config.options.widgets.notes === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "Timers"
-                                        checked: Config.options.widgets.timers === true
-                                        onToggled: Config.set("widgets.timers", !(Config.options.widgets.timers === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "Media"
-                                        checked: Config.options.widgets.media === true
-                                        onToggled: Config.set("widgets.media", !(Config.options.widgets.media === true))
-                                    }
-                                    SSwitchRow {
-                                        title: "Battery"
-                                        checked: Config.options.widgets.battery !== false
-                                        onToggled: Config.set("widgets.battery", !(Config.options.widgets.battery !== false))
-                                    }
-                                    SSwitchRow {
-                                        title: "Network"
-                                        checked: Config.options.widgets.net !== false
-                                        onToggled: Config.set("widgets.net", !(Config.options.widgets.net !== false))
-                                    }
-                                    SSwitchRow {
-                                        title: "Image"
-                                        checked: Config.options.widgets.image !== false
-                                        onToggled: Config.set("widgets.image", !(Config.options.widgets.image !== false))
+                                    Repeater {
+                                        model: WidgetReg.widgets
+                                        delegate: SSwitchRow {
+                                            required property var modelData
+                                            title: modelData.title
+                                            checked: Config.options.widgets[modelData.id] ?? modelData.on
+                                            onToggled: Config.set("widgets." + modelData.id, !(Config.options.widgets[modelData.id] ?? modelData.on))
+                                        }
                                     }
                                     SRow {
                                         icon: "restart_alt"
@@ -589,6 +559,73 @@ Scope {
                                             variant: "secondary"
                                             text: "Reset"
                                             onClicked: Config.set("widgets.pos", "")
+                                        }
+                                    }
+                                    STextRow {
+                                        icon: "image"
+                                        title: "Image card path"
+                                        value: Config.options.widgets.imagePath ?? ""
+                                        placeholder: "/path/to/image (or pick from Widgets)"
+                                        onCommitted: text => Config.set("widgets.imagePath", text)
+                                    }
+                                }
+                                SSection {
+                                    Layout.fillWidth: true
+                                    title: "Weather"
+                                    desc: "Auto uses IP geolocation. Turn it off to pin a city."
+                                    SSwitchRow {
+                                        icon: "explore"
+                                        title: "Auto-detect location"
+                                        sub: "Off = use the manual coordinates below"
+                                        checked: Config.options.weather.autoLocate !== false
+                                        onToggled: Weather.setAuto(!(Config.options.weather.autoLocate !== false))
+                                    }
+                                    STextRow {
+                                        icon: "location_city"
+                                        title: "City label"
+                                        value: (Config.options.weather.autoLocate !== false ? Weather.place : (Config.options.weather.place ?? "")) ?? ""
+                                        placeholder: Weather.place || "e.g. Jakarta"
+                                        onCommitted: text => {
+                                            Config.set("weather.place", text);
+                                            if (text !== "")
+                                                Weather.place = text;
+                                        }
+                                    }
+                                    STextRow {
+                                        icon: "height"
+                                        title: "Latitude"
+                                        value: (Config.options.weather.autoLocate !== false || (Config.options.weather.lat ?? 9999) >= 9000) ? "" : String(Config.options.weather.lat)
+                                        placeholder: String(Math.round(Weather.lat * 100) / 100)
+                                        onCommitted: text => {
+                                            const v = parseFloat(text);
+                                            if (!isNaN(v) && v >= -90 && v <= 90)
+                                                Weather.setManual(v, Weather.lon, Config.options.weather.place ?? Weather.place);
+                                        }
+                                    }
+                                    STextRow {
+                                        icon: "width"
+                                        title: "Longitude"
+                                        value: (Config.options.weather.autoLocate !== false || (Config.options.weather.lon ?? 9999) >= 9000) ? "" : String(Config.options.weather.lon)
+                                        placeholder: String(Math.round(Weather.lon * 100) / 100)
+                                        onCommitted: text => {
+                                            const v = parseFloat(text);
+                                            if (!isNaN(v) && v >= -180 && v <= 180)
+                                                Weather.setManual(Weather.lat, v, Config.options.weather.place ?? Weather.place);
+                                        }
+                                    }
+                                    SRow {
+                                        icon: "sync"
+                                        title: "Weather data"
+                                        sub: Weather.ready ? (Weather.place || "Local") + " · " + Weather.text + " " + Weather.desc : "Not loaded yet"
+                                        NButton {
+                                            variant: "secondary"
+                                            text: "Refresh"
+                                            onClicked: {
+                                                if (Config.options.weather.autoLocate !== false)
+                                                    Weather.locate();
+                                                else
+                                                    Weather.fetch();
+                                            }
                                         }
                                     }
                                 }
@@ -715,6 +752,73 @@ Scope {
                                                 root.bindQuery = "launcher";
                                             }
                                         }
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                visible: root.page === "behavior"
+                                Layout.fillWidth: true
+                                spacing: 12
+                                NText {
+                                    kind: "subtitle"
+                                    semibold: true
+                                    text: "Behavior"
+                                }
+                                SSection {
+                                    Layout.fillWidth: true
+                                    title: "Screen lock"
+                                    desc: "Idle lock (AutoLock) and suspend lock (SleepLock) are built in and official. hypridle config in scripts/ is only a fallback if SleepLock misbehaves."
+                                    SSliderRow {
+                                        icon: "timer"
+                                        title: "Lock after idle"
+                                        sub: "0 disables idle lock. Coffee and game mode pause it."
+                                        value: Config.options.lock.idleMin ?? 10
+                                        from: 0
+                                        to: 60
+                                        step: 5
+                                        suffix: "min"
+                                        onMoved: v => Config.set("lock.idleMin", Math.round(v))
+                                    }
+                                }
+                                SSection {
+                                    Layout.fillWidth: true
+                                    title: "Night light"
+                                    desc: "Warmer screen at night. Needs hyprsunset."
+                                    SSwitchRow {
+                                        icon: "nightlight"
+                                        title: "Night light"
+                                        checked: NightLight.enabled
+                                        onToggled: NightLight.toggle()
+                                    }
+                                    SSliderRow {
+                                        icon: "thermometer"
+                                        title: "Temperature"
+                                        sub: "Lower is warmer"
+                                        value: NightLight.temperature
+                                        from: 1000
+                                        to: 6500
+                                        step: 100
+                                        suffix: "K"
+                                        onMoved: v => NightLight.setTemp(Math.round(v))
+                                    }
+                                }
+                                SSection {
+                                    Layout.fillWidth: true
+                                    title: "Stay awake & performance"
+                                    SSwitchRow {
+                                        icon: "coffee"
+                                        title: "Coffee"
+                                        sub: "Inhibit idle (pauses auto-lock, not suspend)"
+                                        checked: Coffee.enabled
+                                        onToggled: Coffee.toggle()
+                                    }
+                                    SSwitchRow {
+                                        icon: "sports_esports"
+                                        title: "Game mode"
+                                        sub: "Disables animations/blur, inhibits idle, max power profile"
+                                        checked: GameMode.enabled
+                                        onToggled: GameMode.toggle()
                                     }
                                 }
                             }
@@ -1171,6 +1275,31 @@ Scope {
                                             onClicked: SysInfo.refresh()
                                         }
                                     }
+                                    SRow {
+                                        icon: SysInfo.updateAvailable ? "system_update" : "check_circle"
+                                        title: SysInfo.updateChecking ? "Checking for updates..." : (SysInfo.updateAvailable ? "Update available" : "Up to date")
+                                        sub: SysInfo.updateChecking ? "Comparing with git remote..." : (SysInfo.updateStatus !== "" ? SysInfo.updateStatus : "Run git pull in your checkout to update")
+                                        NButton {
+                                            variant: "secondary"
+                                            text: "Check"
+                                            onClicked: SysInfo.checkUpdates()
+                                        }
+                                    }
+                                }
+                                SSection {
+                                    Layout.fillWidth: true
+                                    title: "Dependencies"
+                                    desc: "External tools nshell shells out to. Missing ones disable related features."
+                                    SRow {
+                                        icon: "handyman"
+                                        title: Deps.ready ? (Deps.missing.length === 0 ? "All tools installed" : Deps.missing.length + " tools missing") : "Checking..."
+                                        sub: Deps.ready && Deps.missing.length > 0 ? Deps.missing.map(m => m.tool).join(", ") : "grim, wl-copy, gio, hyprshot, wf-recorder, hyprpicker, brightnessctl, playerctl, cliphist, hyprsunset, powerprofilesctl, python-pillow"
+                                        NButton {
+                                            variant: "secondary"
+                                            text: "Rescan"
+                                            onClicked: Deps.refresh()
+                                        }
+                                    }
                                 }
                                 SSection {
                                     Layout.fillWidth: true
@@ -1229,6 +1358,45 @@ Scope {
                                             variant: "secondary"
                                             text: "Copy"
                                             onClicked: HyprConf.copySettingsSnippet()
+                                        }
+                                    }
+                                    SRow {
+                                        icon: "lock"
+                                        title: "Lock shortcut"
+                                        sub: "Copies an hl.bind snippet for SUPER + L to the clipboard"
+                                        NButton {
+                                            variant: "secondary"
+                                            text: "Copy bind"
+                                            onClicked: HyprConf.copyLockSnippet()
+                                        }
+                                    }
+                                }
+                                SSection {
+                                    Layout.fillWidth: true
+                                    title: "Backup"
+                                    desc: "Snapshots of config.json, widget data and nshell-managed.lua under ~/Documents/nshell-backups."
+                                    SRow {
+                                        icon: "backup"
+                                        title: "Export backup"
+                                        sub: "Save a timestamped snapshot now"
+                                        NButton {
+                                            variant: "secondary"
+                                            text: "Export"
+                                            onClicked: Backup.exportNow()
+                                        }
+                                    }
+                                    Repeater {
+                                        model: Backup.backups
+                                        delegate: SRow {
+                                            required property var modelData
+                                            icon: "history"
+                                            title: modelData
+                                            sub: "Restore this snapshot (reloads Hyprland)"
+                                            NButton {
+                                                variant: "secondary"
+                                                text: "Restore"
+                                                onClicked: Backup.restore(modelData)
+                                            }
                                         }
                                     }
                                 }

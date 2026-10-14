@@ -120,9 +120,9 @@ Scope {
                             required property int index
                             width: 208
                             height: 124
-                            NRoundedImage {
+                            NThumb {
                                 anchors.fill: parent
-                                source: "file://" + modelData
+                                file: modelData
                                 imgRadius: Tokens.rounding.medium
                             }
                             Rectangle {

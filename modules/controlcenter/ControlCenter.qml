@@ -113,6 +113,26 @@ Scope {
                         }
                         QSTile {
                             Layout.fillWidth: true
+                            icon: "vpn_key"
+                            title: "VPN"
+                            subtitle: Network.vpnActive !== "" ? Network.vpnActive : (Network.vpns.length > 0 ? "Off" : "No profiles")
+                            active: Network.vpnActive !== ""
+                            hasMenu: Network.vpns.length > 0
+                            onClicked: {
+                                if (Network.vpnActive !== "")
+                                    Network.vpnDown();
+                                else if (Network.vpns.length === 1)
+                                    Network.vpnUp(Network.vpns[0]);
+                                else if (Network.vpns.length > 1)
+                                    win.page = "vpn";
+                            }
+                            onMenuClicked: {
+                                win.page = "vpn";
+                                Network.pollVpn();
+                            }
+                        }
+                        QSTile {
+                            Layout.fillWidth: true
                             icon: "do_not_disturb_on"
                             title: "Do not disturb"
                             subtitle: Notifs.dnd ? "On" : "Off"
@@ -126,6 +146,30 @@ Scope {
                             subtitle: Theme.light ? "Light" : "Dark"
                             active: !Theme.light
                             onClicked: Config.set("theme.mode", Theme.light ? "dark" : "light")
+                        }
+                        QSTile {
+                            Layout.fillWidth: true
+                            icon: "nightlight"
+                            title: "Night light"
+                            subtitle: NightLight.enabled ? NightLight.temperature + "K" : "Off"
+                            active: NightLight.enabled
+                            onClicked: NightLight.toggle()
+                        }
+                        QSTile {
+                            Layout.fillWidth: true
+                            icon: "coffee"
+                            title: "Coffee"
+                            subtitle: Coffee.enabled ? "Staying awake" : "Off"
+                            active: Coffee.enabled
+                            onClicked: Coffee.toggle()
+                        }
+                        QSTile {
+                            Layout.fillWidth: true
+                            icon: "sports_esports"
+                            title: "Game mode"
+                            subtitle: GameMode.enabled ? "On" : "Off"
+                            active: GameMode.enabled
+                            onClicked: GameMode.toggle()
                         }
                         QSTile {
                             Layout.fillWidth: true
@@ -460,6 +504,84 @@ Scope {
 
                     ColumnLayout {
                         Layout.fillWidth: true
+                        visible: win.page === "vpn"
+                        spacing: 8
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            NIconButton {
+                                name: "chevron_left"
+                                glyphSize: 16
+                                onClicked: win.page = "main"
+                            }
+                            NText {
+                                Layout.fillWidth: true
+                                kind: "title"
+                                semibold: true
+                                text: "VPN"
+                            }
+                            NIconButton {
+                                name: "sync"
+                                glyphSize: 14
+                                onClicked: Network.pollVpn()
+                            }
+                        }
+
+                        NText {
+                            Layout.fillWidth: true
+                            visible: Network.vpns.length === 0
+                            horizontalAlignment: Text.AlignHCenter
+                            kind: "caption"
+                            color: Theme.fg3
+                            text: "No VPN profiles — add one in NetworkManager"
+                        }
+                        Repeater {
+                            model: Network.vpns
+                            delegate: Rectangle {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                implicitHeight: 48
+                                radius: Tokens.rounding.large
+                                color: "transparent"
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    anchors.rightMargin: 8
+                                    spacing: 8
+                                    Rectangle {
+                                        Layout.alignment: Qt.AlignVCenter
+                                        width: 8
+                                        height: 8
+                                        radius: 4
+                                        visible: Network.vpnActive === modelData
+                                        color: Theme.brandBg
+                                    }
+                                    NText {
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter
+                                        elide: Text.ElideRight
+                                        kind: "small"
+                                        text: modelData
+                                    }
+                                    NButton {
+                                        variant: Network.vpnActive === modelData ? "secondary" : "primary"
+                                        text: Network.vpnActive === modelData ? "Down" : "Up"
+                                        enabled: !Network.vpnBusy
+                                        onClicked: {
+                                            if (Network.vpnActive === modelData)
+                                                Network.vpnDown();
+                                            else
+                                                Network.vpnUp(modelData);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
                         visible: win.page === "bluetooth"
                         spacing: 8
 
@@ -646,6 +768,54 @@ Scope {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: Audio.setDefaultSource(modelData)
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        visible: Audio.streams.length > 0 && win.page === "main"
+                        spacing: 4
+                        NText {
+                            kind: "caption"
+                            color: Theme.fg3
+                            text: "App volumes"
+                        }
+                        Repeater {
+                            model: Audio.streams
+                            delegate: RowLayout {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                spacing: 8
+                                NIconButton {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    name: modelData.audio.muted ? "volume_off" : "volume_up"
+                                    glyphSize: 16
+                                    onClicked: Audio.toggleStreamMute(modelData)
+                                }
+                                NText {
+                                    Layout.preferredWidth: 110
+                                    Layout.alignment: Qt.AlignVCenter
+                                    elide: Text.ElideRight
+                                    kind: "small"
+                                    color: Theme.fg2
+                                    text: Audio.streamLabel(modelData)
+                                }
+                                NSlider {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    trackSize: 30
+                                    value: modelData.audio.volume
+                                    onMoved: v => Audio.setStreamVolume(modelData, v)
+                                }
+                                NText {
+                                    Layout.preferredWidth: 30
+                                    Layout.alignment: Qt.AlignVCenter
+                                    horizontalAlignment: Text.AlignRight
+                                    kind: "caption"
+                                    color: Theme.fg2
+                                    text: Math.round(modelData.audio.volume * 100)
                                 }
                             }
                         }

@@ -9,7 +9,6 @@ Singleton {
     id: root
     property var current: null
     property var queue: []
-    onCurrentChanged: console.log("NSHELLDBG current now: " + (current ? current.summary : "null"))
     property var seenIds: ({})
     property int rev: 0
     property bool dnd: Config.options.notifications.dnd ?? false
@@ -108,12 +107,10 @@ Singleton {
         imageSupported: true
         inlineReplySupported: true
         onNotification: n => {
-            console.log("NSHELLDBG notif recv: " + n.summary);
             n.tracked = true;
             root.rev++;
             if (!root.dnd)
                 root.enqueue(n);
-            console.log("NSHELLDBG popup current set: " + (root.current !== null));
         }
     }
 }

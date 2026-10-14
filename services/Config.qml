@@ -37,6 +37,19 @@ Singleton {
         onTriggered: view.writeAdapter()
     }
 
+    Process {
+        id: moveProc
+        onExited: exitCode => {
+            if (exitCode === 0) {
+                view.writeAdapter();
+                Quickshell.execDetached(["notify-send", "nshell", "Config was corrupt — quarantined and reset to defaults"]);
+            } else {
+                Quickshell.execDetached(["notify-send", "nshell", "Config failed to load and could not be quarantined"]);
+            }
+            root.ready = true;
+        }
+    }
+
     FileView {
         id: view
         path: root.configFile
@@ -49,7 +62,16 @@ Singleton {
                 Quickshell.execDetached(["mkdir", "-p", root.configDir]);
                 writeAdapter();
                 root.ready = true;
+            } else {
+                const bad = root.configFile + ".corrupt-" + Qt.formatDateTime(new Date(), "yyyyMMdd-HHmmss");
+                if (!moveProc.running) {
+                    moveProc.command = ["mv", root.configFile, bad];
+                    moveProc.running = true;
+                }
             }
+        }
+        onSaveFailed: error => {
+            Quickshell.execDetached(["notify-send", "nshell", "Could not save config: " + FileViewError.toString(error)]);
         }
 
         JsonAdapter {
@@ -92,7 +114,7 @@ Singleton {
                 }
                 property int pillPadding: 20
                 property int avatarSize: 32
-                property int searchWidth: 200
+                property string avatarPath: ""
                 property int shadow: 12
                 property list<string> pinnedApps: []
                 property bool clock12h: true
@@ -139,6 +161,28 @@ Singleton {
                 property bool net: true
                 property bool image: true
                 property string imagePath: ""
+            }
+            property JsonObject lock: JsonObject {
+                property int idleMin: 10
+            }
+            property JsonObject nightlight: JsonObject {
+                property bool enabled: false
+                property int temperature: 4500
+            }
+            property JsonObject weather: JsonObject {
+                property bool autoLocate: true
+                property string place: ""
+                property real lat: 9999
+                property real lon: 9999
+            }
+            property JsonObject coffee: JsonObject {
+                property bool enabled: false
+            }
+            property JsonObject gamemode: JsonObject {
+                property bool enabled: false
+            }
+            property JsonObject apps: JsonObject {
+                property string pos: ""
             }
         }
     }

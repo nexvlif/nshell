@@ -60,7 +60,7 @@ Scope {
                         spacing: 12
                         NAvatar {
                             diameter: 40
-                            source: "file://" + Quickshell.env("HOME") + "/Pictures/pp.jpg"
+                            source: Avatar.source
                         }
                         ColumnLayout {
                             Layout.fillWidth: true

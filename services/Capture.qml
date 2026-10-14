@@ -45,10 +45,6 @@ Singleton {
         return (m < 10 ? "0" + m : "" + m) + ":" + (s < 10 ? "0" + s : "" + s);
     }
 
-    function sh(cmd: string): void {
-        Quickshell.execDetached(["sh", "-c", cmd]);
-    }
-
     function notify(title: string, body: string): void {
         Quickshell.execDetached(["notify-send", title, body]);
     }
@@ -93,8 +89,15 @@ Singleton {
             preTimer.restart();
         } else {
             const delay = root.delaySec > 0 ? "sleep " + root.delaySec + "; " : "";
-            sh("sleep " + (hideMs / 1000) + "; " + delay + cmd);
+            runShotCmd("sleep " + (hideMs / 1000) + "; " + delay + cmd);
         }
+    }
+
+    function runShotCmd(cmd: string): void {
+        if (shotProc.running)
+            return;
+        shotProc.command = ["sh", "-c", cmd];
+        shotProc.running = true;
     }
 
     function beginSelect(): void {
@@ -129,7 +132,7 @@ Singleton {
         root.counting = false;
         const c = root.pendingCmd;
         root.pendingCmd = "";
-        sh("sleep 0.35; " + c);
+        runShotCmd("sleep 0.35; " + c);
     }
 
     function pick(): void {
@@ -138,19 +141,20 @@ Singleton {
     }
 
     function gallery(): void {
-        Quickshell.execDetached(["sh", "-c", "mkdir -p '" + root.dir + "'; xdg-open '" + root.dir + "'"]);
+        Quickshell.execDetached(["xdg-open", root.dir]);
     }
 
     function openFile(): void {
         if (root.lastFile !== "")
-            Quickshell.execDetached(["sh", "-c", "xdg-open '" + root.lastFile + "' 2>/dev/null || xdg-open '" + root.dir + "'"]);
+            Quickshell.execDetached(["xdg-open", root.lastFile]);
         else
             gallery();
     }
 
     function toggleRecord(): void {
         if (root.recording) {
-            Quickshell.execDetached(["sh", "-c", "pkill -INT -x wf-recorder; notify-send 'Recording' 'Saved to " + root.dir + "'"]);
+            Quickshell.execDetached(["pkill", "-INT", "-x", "wf-recorder"]);
+            root.notify("Recording", "Saved to " + root.dir);
             root.recording = false;
             return;
         }
@@ -207,7 +211,7 @@ Singleton {
                 root.counting = false;
                 const c = root.pendingCmd;
                 root.pendingCmd = "";
-                sh("sleep 0.35; " + c);
+                runShotCmd("sleep 0.35; " + c);
             }
         }
     }
@@ -241,6 +245,14 @@ Singleton {
     }
 
     Process {
+        id: shotProc
+        onExited: exitCode => {
+            if (exitCode !== 0)
+                root.notify("Screenshot", "Screenshot failed — is grim installed?");
+        }
+    }
+
+    Process {
         id: recCheck
         command: ["sh", "-c", "command -v wf-recorder"]
         onExited: exitCode => {
@@ -249,7 +261,7 @@ Singleton {
                 return;
             }
             const f = root.dir + "/rec-" + root.stamp() + ".mp4";
-            Quickshell.execDetached(["sh", "-c", "mkdir -p '" + root.dir + "'; wf-recorder -f '" + f + "'"]);
+            Quickshell.execDetached(["wf-recorder", "-f", f]);
             root.recElapsed = 0;
             root.recording = true;
             Quickshell.execDetached(["notify-send", "Recording", "Saving to " + f]);
@@ -273,4 +285,6 @@ Singleton {
                 recPoll.running = true;
         }
     }
+
+    Component.onCompleted: Quickshell.execDetached(["mkdir", "-p", root.dir])
 }

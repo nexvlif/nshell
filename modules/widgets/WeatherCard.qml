@@ -42,7 +42,7 @@ NRect {
                     kind: "caption"
                     color: Theme.fg3
                     elide: Text.ElideRight
-                    text: Weather.place || "Local"
+                    text: (Weather.place || "Local") + (Config.options.weather.autoLocate !== false ? "" : " · manual")
                 }
             }
             NIcon {
@@ -50,6 +50,17 @@ NRect {
                 name: Weather.ready ? Weather.icon : "cloudy"
                 iconSize: 56
                 color: Theme.fg1
+            }
+            NIconButton {
+                Layout.alignment: Qt.AlignTop
+                name: "sync"
+                glyphSize: 18
+                onClicked: {
+                    if (Config.options.weather.autoLocate !== false)
+                        Weather.locate();
+                    else
+                        Weather.fetch();
+                }
             }
         }
         RowLayout {
