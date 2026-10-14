@@ -23,7 +23,7 @@ Scope {
 
             property string pos: Config.options.bar.position
             readonly property var barM: Config.options.bar.margins[pos] ?? Config.options.bar.margins["bottom"]
-            // Safe per-edge clearance (12px default on non-bar sides).
+
             readonly property int vClearSafe: (pos === "top" || pos === "bottom") ? (Config.options.bar.height + barM.top + barM.bottom + 12) : 12
             readonly property int hClearSafe: (pos === "left" || pos === "right") ? (Config.options.bar.height + barM.left + barM.right + 12) : 12
             anchors {
@@ -164,7 +164,7 @@ Scope {
                                 name: Mpris.playing ? "pause" : "play_arrow"
                                 filled: true
                                 iconSize: 22
-                                color: "#ffffff"
+                                color: Theme.activeFg
                             }
                             MouseArea {
                                 id: playHover
