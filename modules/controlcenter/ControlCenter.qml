@@ -23,8 +23,9 @@ Scope {
 
             property string pos: Config.options.bar.position
             readonly property var barM: Config.options.bar.margins[pos] ?? Config.options.bar.margins["bottom"]
-            readonly property int vClear: Config.options.bar.height + barM.top + barM.bottom + 12
-            readonly property int hClear: Config.options.bar.height + barM.left + barM.right + 12
+            // Safe per-edge clearance (12px default on non-bar sides).
+            readonly property int vClearSafe: (pos === "top" || pos === "bottom") ? (Config.options.bar.height + barM.top + barM.bottom + 12) : 12
+            readonly property int hClearSafe: (pos === "left" || pos === "right") ? (Config.options.bar.height + barM.left + barM.right + 12) : 12
             property string pendingSsid: ""
             property string page: "main"
             anchors {
@@ -55,15 +56,9 @@ Scope {
                 focus: true
                 Keys.onEscapePressed: Ui.closeAll()
                 width: 400
-                implicitHeight: panelCol.implicitHeight + 40
-                anchors.right: (pos === "left") ? undefined : parent.right
-                anchors.left: (pos === "left") ? parent.left : undefined
-                anchors.top: (pos === "top") ? parent.top : undefined
-                anchors.bottom: (pos !== "top") ? parent.bottom : undefined
-                anchors.topMargin: pos === "top" ? win.vClear : 12
-                anchors.bottomMargin: pos === "bottom" ? win.vClear : 12
-                anchors.leftMargin: pos === "left" ? win.hClear : 12
-                anchors.rightMargin: pos === "right" ? win.hClear : 12
+                height: panelCol.implicitHeight + 40
+                x: (pos === "left") ? win.hClearSafe : win.width - width - win.hClearSafe
+                y: (pos === "top") ? win.vClearSafe : win.height - height - win.vClearSafe
                 corner: Tokens.rounding.popover
                 fill: "bg1"
                 stroke: "none"
