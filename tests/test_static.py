@@ -31,7 +31,15 @@ cfg = read("services/Config.qml")
 bar = read("modules/bar/Bar.qml")
 hypridle = read("scripts/hypridle-nshell.conf")
 weather = read("services/Weather.qml")
-settings = read("modules/settings/Settings.qml")
+# Settings content lives in Settings.qml + Page*.qml siblings.
+def read_settings() -> str:
+    parts = [(ROOT / "modules/settings/Settings.qml").read_text()]
+    for p in sorted((ROOT / "modules/settings").glob("Page*.qml")):
+        parts.append(p.read_text())
+    return "\n".join(parts)
+
+
+settings = read_settings()
 wxcard = read("modules/widgets/WeatherCard.qml")
 shell = read("shell.qml")
 avatar = read("services/Avatar.qml")
@@ -115,14 +123,23 @@ check("apps hugs content", "anchors" in apps and "posX" in apps)
 
 # 7. Config.options top-level refs resolve to a defined section
 sections = set(re.findall(r"property JsonObject (\w+)", cfg))
+_settings_files = ["modules/settings/Settings.qml"] + sorted(
+    str(p.relative_to(ROOT)) for p in (ROOT / "modules/settings").glob("Page*.qml"))
 refs = set(re.findall(r"Config\.options\.(\w+)", "".join(
     (ROOT / f).read_text() for f in [
-        "modules/bar/Bar.qml", "modules/settings/Settings.qml",
+        "modules/bar/Bar.qml"] + _settings_files + [
         "modules/widgets/WeatherCard.qml", "services/Weather.qml",
         "services/Avatar.qml", "modules/lock/LockScreen.qml",
         "modules/session/SessionMenu.qml"])))
 unknown = sorted(refs - sections)
 check("config sections resolve", not unknown, f"unknown {unknown} vs {sorted(sections)}")
+
+# 11. Settings pages live in split Page*.qml siblings, parent only instantiates
+_pages = sorted((ROOT / "modules/settings").glob("Page*.qml"))
+_parent = (ROOT / "modules/settings/Settings.qml").read_text()
+check("settings split", len(_pages) >= 14)
+check("settings parent instantiates", _parent.count("visible: root.page ===") == 14
+      and "SSection" not in _parent and "ColumnLayout {\n                                visible" not in _parent)
 
 # 8. Every icon/name literal must exist in the bundled MaterialSymbolsLite
 # font (ligature GSUB; '_' is stored as 'underscore'). A missing name
