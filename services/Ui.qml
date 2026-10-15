@@ -37,6 +37,14 @@ Singleton {
     property bool appsOpen: false
     property string appPage: "calc"
 
+    readonly property var _panels: ["launcherOpen", "sessionOpen", "nflyoutOpen", "controlOpen", "clipOpen", "notifOpen", "calendarOpen", "screenshotOpen", "recordingOpen", "galleryOpen", "fileOpen", "settingsOpen", "appsOpen"]
+
+    function _flip(prop: string): void {
+        const v = !root[prop];
+        closeAll();
+        root[prop] = v;
+    }
+
     function showLock(): void {
         closeAll();
         lockOpen = true;
@@ -71,207 +79,46 @@ Singleton {
     }
 
     function toggleLauncher(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        launcherOpen = !launcherOpen;
+        _flip("launcherOpen");
     }
     function toggleSession(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        launcherOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        sessionOpen = !sessionOpen;
+        _flip("sessionOpen");
     }
     function toggleNflyout(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        nflyoutOpen = !nflyoutOpen;
+        _flip("nflyoutOpen");
     }
     function toggleControl(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        controlOpen = !controlOpen;
+        _flip("controlOpen");
     }
     function toggleClipboard(): void {
-        clipOpen = !clipOpen;
-        appsOpen = false;
-        closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
+        _flip("clipOpen");
+    }
+    function toggleCalendar(): void {
+        _flip("calendarOpen");
+    }
+    function toggleScreenshot(): void {
+        _flip("screenshotOpen");
+    }
+    function toggleRecording(): void {
+        _flip("recordingOpen");
+    }
+    function toggleGallery(): void {
+        _flip("galleryOpen");
+    }
+    function toggleSettings(): void {
+        _flip("settingsOpen");
+    }
+    function toggleFileManager(): void {
+        _flip("fileOpen");
     }
     function toggleNotif(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        notifOpen = !notifOpen;
-        if (notifOpen) {
+        const v = !notifOpen;
+        closeAll();
+        notifOpen = v;
+        if (v) {
             Notifs.clearPopup();
             Notifs.markSeen();
         }
-    }
-    function toggleCalendar(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        calendarOpen = !calendarOpen;
-    }
-    function toggleScreenshot(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        screenshotOpen = !screenshotOpen;
-    }
-    function toggleRecording(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        recordingOpen = !recordingOpen;
-    }
-    function toggleGallery(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        galleryOpen = !galleryOpen;
-    }
-    function toggleSettings(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        appsOpen = false;
-        settingsOpen = !settingsOpen;
-    }
-    function toggleFileManager(): void {
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        settingsOpen = false;
-        appsOpen = false;
-        fileOpen = !fileOpen;
     }
     function openApp(page: string): void {
         closeAll();
@@ -283,39 +130,15 @@ Singleton {
             appsOpen = false;
             return;
         }
-        clipOpen = false;
-        closeTrayMenu();
-        closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
+        closeAll();
         appPage = page;
         appsOpen = true;
     }
     function closeAll(): void {
-        clipOpen = false;
-        appsOpen = false;
+        for (const p of root._panels)
+            root[p] = false;
         closeTrayMenu();
         closeWallMenu();
-        launcherOpen = false;
-        sessionOpen = false;
-        nflyoutOpen = false;
-        controlOpen = false;
-        notifOpen = false;
-        calendarOpen = false;
-        screenshotOpen = false;
-        recordingOpen = false;
-        galleryOpen = false;
-        fileOpen = false;
-        settingsOpen = false;
     }
 
     Timer {

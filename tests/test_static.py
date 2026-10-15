@@ -92,7 +92,11 @@ ui = read("services/Ui.qml")
 launcher = read("modules/launcher/Launcher.qml")
 check("ui apps state", "appsOpen" in ui and 'appPage' in ui)
 check("ui openApp/toggleApps", "openApp(page" in ui and "toggleApps(page" in ui)
-check("ui apps exclusion", ui.count("appsOpen = false") >= 12)
+check("ui single exclusivity", '"appsOpen"' in ui and '"launcherOpen"' in ui and "function _flip(prop: string)" in ui)
+check("ui no duplicated close-lists", all(f"{p} = false" not in ui for p in [
+    "launcherOpen", "sessionOpen", "nflyoutOpen", "controlOpen", "clipOpen",
+    "notifOpen", "calendarOpen", "screenshotOpen", "recordingOpen",
+    "galleryOpen", "fileOpen", "settingsOpen"]))
 for page in ["CalcPage", "CameraPage", "RecPage"]:
     check(f"apps has {page}", (ROOT / f"modules/apps/{page}.qml").exists())
 for entry in ["Calculator", "Camera", "Voice recorder", "openApp(\"calc\")",
